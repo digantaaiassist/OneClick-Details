@@ -1,387 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SB Rating & ROI Calculator</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3a8a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        body {
-            background-color: #0f172a;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e40af">
+  <title>Credit Appraisal, Rate & Sanction Power Calculator</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .result-card { transition: all 0.2s ease-in-out; }
+    .result-card:hover { transform: translateY(-2px); }
+  </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 shadow-md">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-blue-400 tracking-wide flex items-center gap-2">
-                🏦 SB Rating & ROI Portal
-            </h1>
-            <span class="text-xs bg-blue-900/50 text-blue-300 border border-blue-800 px-3 py-1 rounded-full font-semibold">
-                PWA Ready
-            </span>
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 mb-6 shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-xl font-bold text-blue-400">SBI Credit Matrix & Sanction Engine</h1>
+        <p class="text-xs text-slate-400">EBLR/MCLR, Collateral, Delegation, Charges & Concessions</p>
+      </div>
+      <span class="text-xs px-2.5 py-1 rounded bg-blue-900/60 text-blue-300 border border-blue-700 font-mono">PWA Enabled</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- INPUT PARAMETERS PANEL -->
+    <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-sm h-fit">
+      <h2 class="text-lg font-semibold text-white mb-4 border-b border-slate-700 pb-2 flex items-center gap-2">
+        <span>Parameters</span>
+      </h2>
+
+      <div class="space-y-4 text-sm">
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Borrower CRA Rating</label>
+          <select id="rating" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="SB01">SB01 (Score: 95-100) - Lowest Risk</option>
+            <option value="SB02">SB02 (Score: 91-94)</option>
+            <option value="SB03">SB03 (Score: 87-90)</option>
+            <option value="SB04">SB04 (Score: 83-86)</option>
+            <option value="SB05">SB05 (Score: 78-82)</option>
+            <option value="SB06">SB06 (Score: 73-77)</option>
+            <option value="SB07">SB07 (Score: 67-72)</option>
+            <option value="SB08">SB08 (Score: 61-66)</option>
+            <option value="SB09">SB09 (Score: 55-60)</option>
+            <option value="SB10">SB10 (Score: 49-54) - Threshold</option>
+            <option value="SB11">SB11 (Score: 43-48) - Low Safety</option>
+            <option value="SB12">SB12 (Score: 37-42)</option>
+            <option value="SB13">SB13 (Score: 31-36)</option>
+            <option value="SB14">SB14 (Score: 25-30)</option>
+            <option value="SB15">SB15 (Score: <=24)</option>
+            <option value="SB16">SB16 (Unrated / Default)</option>
+          </select>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow p-4 md:p-8 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- Controls Column -->
-        <section class="lg:col-span-7 bg-slate-900/60 border border-slate-800 p-6 rounded-2xl shadow-xl backdrop-blur-md space-y-6">
-            <h2 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-3">Input Parameters</h2>
-            
-            <!-- SB Rating -->
-            <div>
-                <label for="sbRating" class="block text-sm font-semibold text-slate-300 mb-2">SB Rating / CUE Category</label>
-                <select id="sbRating" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                    <option value="1">SB-01 (CUE-01)</option>
-                    <option value="2">SB-02 (CUE-02)</option>
-                    <option value="3">SB-03 (CUE-03)</option>
-                    <option value="4">SB-04 (CUE-04)</option>
-                    <option value="5" selected>SB-05 (CUE-05)</option>
-                    <option value="6">SB-06 (CUE-06)</option>
-                    <option value="7">SB-07 (CUE-07)</option>
-                    <option value="8">SB-08 (CUE-08)</option>
-                    <option value="9">SB-09 (CUE-09)</option>
-                    <option value="10">SB-10 (CUE-10)</option>
-                    <option value="11">SB-11 (CUE-11)</option>
-                    <option value="12">SB-12 (CUE-12)</option>
-                    <option value="13">SB-13 (CUE-13)</option>
-                    <option value="14">SB-14 (CUE-14)</option>
-                    <option value="15">SB-15 (CUE-15)</option>
-                    <option value="16">SB-16 (Unrated)</option>
-                </select>
-            </div>
-
-            <!-- Exposure / Firm Limit -->
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label for="exposure" class="text-sm font-semibold text-slate-300">Total Exposure / Limit</label>
-                    <span id="exposureVal" class="text-sm font-bold text-blue-400">5.00 Crores</span>
-                </div>
-                <input type="range" id="exposure" min="1" max="1000" value="50" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
-                <div class="flex justify-between text-xs text-slate-500 mt-1">
-                    <span>10 Lakhs (0.10 Cr)</span>
-                    <span>10.00 Crores</span>
-                </div>
-            </div>
-
-            <!-- EBLR -->
-            <div>
-                <div class="flex justify-between items-center mb-2">
-                    <label for="eblr" class="text-sm font-semibold text-slate-300">Current EBLR (%)</label>
-                    <span id="eblrVal" class="text-sm font-bold text-blue-400">7.90%</span>
-                </div>
-                <input type="range" id="eblr" min="5.00" max="12.00" step="0.05" value="7.90" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
-            </div>
-
-            <!-- Collateral Coverage -->
-            <div>
-                <label for="collateral" class="block text-sm font-semibold text-slate-300 mb-2">Realizable Tangible Collateral</label>
-                <select id="collateral" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                    <option value="usual" selected>Usual Dispensation (< 50%)</option>
-                    <option value="50_75">> 50% to 75%</option>
-                    <option value="75_100">> 75% to 100%</option>
-                    <option value="above_100">> 100%</option>
-                </select>
-            </div>
-        </section>
-
-        <!-- Results Column -->
-        <section class="lg:col-span-5 space-y-6">
-            
-            <!-- ROI Result Card -->
-            <div class="bg-gradient-to-br from-blue-950 to-slate-900 border border-blue-900/50 p-6 rounded-2xl shadow-xl relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl"></div>
-                
-                <h3 class="text-sm uppercase tracking-widest text-blue-300 font-bold mb-4">Calculated Pricing</h3>
-                <div class="flex items-baseline gap-2">
-                    <span id="finalRoi" class="text-5xl font-extrabold text-white tracking-tight">8.65%</span>
-                    <span class="text-slate-400 text-sm font-semibold">p.a.</span>
-                </div>
-                <p class="text-slate-400 text-xs mt-2">Based on current parameters and card rate definitions.</p>
-
-                <div class="mt-6 border-t border-slate-800/80 pt-4 space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">EBLR / EBR:</span>
-                        <span id="calcEblr" class="font-semibold text-slate-200">7.90%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Applicable Spread:</span>
-                        <span id="calcSpread" class="font-semibold text-slate-200">+1.55%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-400">Card Concession:</span>
-                        <span id="calcConcession" class="font-semibold text-emerald-400">-0.80%</span>
-                    </div>
-                    <div class="flex justify-between" id="collateralPricingRow">
-                        <span class="text-slate-400">Collateral Discount:</span>
-                        <span id="calcCollateral" class="font-semibold text-emerald-400">N/A</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Risk & Guidelines Card -->
-            <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-                <h3 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-3">Risk & Operational Guidelines</h3>
-                
-                <div class="grid grid-cols-2 gap-4 text-xs">
-                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-800">
-                        <span class="block text-slate-500 font-medium mb-1">CRA Score Range</span>
-                        <strong id="scoreRange" class="text-slate-200 text-sm">78 - 82</strong>
-                    </div>
-                    <div class="bg-slate-800/40 p-3 rounded-xl border border-slate-800">
-                        <span class="block text-slate-500 font-medium mb-1">Comfort Level</span>
-                        <strong id="comfortLevel" class="text-slate-200 text-sm">Adequate Safety</strong>
-                    </div>
-                </div>
-
-                <div class="space-y-3 text-sm">
-                    <div>
-                        <span class="text-slate-400 block text-xs">Risk Profile</span>
-                        <span id="riskLevel" class="font-semibold text-slate-200">Moderate risk with Adequate Cushion</span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 block text-xs">Recommended Proposal Format</span>
-                        <span id="proposalFormat" class="font-semibold text-blue-400">DDS-CUE V2 Format</span>
-                    </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <span class="text-slate-400 block text-xs">Unified Processing Fee</span>
-                        <span id="processingFee" class="font-bold text-emerald-400 text-base">Rs. 37,500 (0.75% of limit)</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-900 py-4 px-6 text-center text-xs text-slate-500">
-        <div class="max-w-6xl mx-auto space-y-1">
-            <p>© 2026 SBI Circular-linked Credit Assistant. Strictly for internal calculations.</p>
-            <p>Data derived from Master Circulars on Advances and Collateral-linked Pricing Schemes.</p>
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Total Aggregate Exposure (₹ in Crores)</label>
+          <input type="number" id="exposureCr" step="0.01" value="2.50" min="0.01" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <span id="exposureInWords" class="text-xs text-slate-400 mt-1 block font-mono">₹ 2,50,00,000 (2.50 Cr)</span>
         </div>
-    </footer>
 
-    <!-- JS Calculator Engine -->
-    <script>
-        // Score Ranges & Comfort Metrics
-        const ratingMetrics = {
-            1: { range: "95 - 100", risk: "Virtually Zero Risk", comfort: "Virtually Absolute Safety" },
-            2: { range: "91 - 94", risk: "Lowest Risk", comfort: "Highest Safety" },
-            3: { range: "87 - 90", risk: "Lower Risk", comfort: "Higher Safety" },
-            4: { range: "83 - 86", risk: "Low Risk", comfort: "High Safety" },
-            5: { range: "78 - 82", risk: "Moderate Risk (Adequate Cushion)", comfort: "Adequate Safety" },
-            6: { range: "73 - 77", risk: "Moderate Risk", comfort: "Moderate Safety" },
-            7: { range: "67 - 72", risk: "Moderate Risk", comfort: "Moderate Safety" },
-            8: { range: "61 - 66", risk: "Average Risk", comfort: "Above Safety Threshold" },
-            9: { range: "55 - 60", risk: "Average Risk", comfort: "Above Safety Threshold" },
-            10: { range: "49 - 54", risk: "Acceptable Risk (Threshold)", comfort: "Inadequate Safety" },
-            11: { range: "43 - 48", risk: "Borderline Risk", comfort: "Low Safety" },
-            12: { range: "37 - 42", risk: "High Risk", comfort: "Lower Safety" },
-            13: { range: "31 - 36", risk: "Higher Risk", comfort: "Lowest Safety" },
-            14: { range: "25 - 30", risk: "Substantial Risk", comfort: "NIL" },
-            15: { range: "<= 24", risk: "Pre-Default Risk", comfort: "NIL" },
-            16: { range: "Unrated", risk: "Unrated / Default Risk", comfort: "NIL" }
-        };
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">EBLR / EBR Benchmark (%)</label>
+          <input type="number" id="eblr" step="0.01" value="7.90" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500">
+        </div>
 
-        // Standard Card Pricing Spread & Concession mapping by Limits
-        function getStandardSpreadAndConcession(sbRating, exposureCr) {
-            // Limits <= 1 Crore
-            if (exposureCr <= 1.0) {
-                if (sbRating <= 4) return { spread: 1.55, concession: 0.85 };
-                if (sbRating <= 6) return { spread: 1.70, concession: 0.85 };
-                if (sbRating <= 8) return { spread: 1.95, concession: 0.85 };
-                if (sbRating === 9) return { spread: 2.45, concession: 0.85 };
-                if (sbRating <= 12) return { spread: 3.45, concession: 0.50 };
-                return { spread: 4.70, concession: 0.50 }; // SB13 - SB15
-            }
-            // Limits > 1 Cr to 5 Cr
-            else if (exposureCr <= 5.0) {
-                if (sbRating <= 4) return { spread: 1.45, concession: 0.80 };
-                if (sbRating <= 6) return { spread: 1.60, concession: 0.80 };
-                if (sbRating <= 8) return { spread: 1.85, concession: 0.80 };
-                if (sbRating === 9) return { spread: 2.35, concession: 0.80 };
-                if (sbRating <= 12) return { spread: 2.85, concession: 0.50 };
-                return { spread: 3.55, concession: 0.00 }; // SB13 - SB15
-            }
-            // Limits > 5 Cr to 7.5 Cr
-            else if (exposureCr <= 7.5) {
-                if (sbRating <= 4) return { spread: 1.40, concession: 0.80 };
-                if (sbRating <= 6) return { spread: 1.55, concession: 0.80 };
-                if (sbRating <= 8) return { spread: 1.80, concession: 0.80 };
-                if (sbRating === 9) return { spread: 2.30, concession: 0.80 };
-                if (sbRating <= 12) return { spread: 2.80, concession: 0.50 };
-                return { spread: 4.00, concession: 0.50 }; // SB13 - SB15
-            }
-            // Limits > 7.5 Cr to 10 Cr
-            else {
-                if (sbRating <= 4) return { spread: 1.35, concession: 0.80 };
-                if (sbRating <= 6) return { spread: 1.50, concession: 0.80 };
-                if (sbRating <= 8) return { spread: 1.75, concession: 0.80 };
-                if (sbRating === 9) return { spread: 2.25, concession: 0.80 };
-                if (sbRating <= 12) return { spread: 2.75, concession: 0.50 };
-                return { spread: 4.00, concession: 0.50 }; // SB13 - SB15
-            }
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Security / Guarantee Dispensation</label>
+          <select id="dispensation" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500">
+            <option value="collateral">Tangible Collateral Security Available</option>
+            <option value="cgtmse">CGTMSE Covered Account</option>
+            <option value="clean">Clean / Collateral < 50% / No Security</option>
+          </select>
+        </div>
+
+        <div id="collateralWrapper">
+          <label class="block text-slate-300 font-medium mb-1">Collateral Coverage Level (%)</label>
+          <select id="collateralLevel" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500">
+            <option value="gt100">&gt; 100% Coverage</option>
+            <option value="75_100">&gt; 75% to 100% Coverage</option>
+            <option value="50_75">&gt; 50% to 75% Coverage</option>
+            <option value="lt50">&lt; 50% Coverage (No concession)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Borrower Entity Type</label>
+          <select id="borrowerType" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+            <option value="corporate">Corporate</option>
+            <option value="non_corporate">Non-Corporate</option>
+            <option value="individual">Individual</option>
+          </select>
+        </div>
+
+        <div class="border-t border-slate-700 pt-3 space-y-2">
+          <span class="block text-slate-400 font-medium text-xs uppercase tracking-wider">Additional Concessions</span>
+          <div class="flex items-center">
+            <input type="checkbox" id="womenEnt" class="w-4 h-4 rounded border-slate-700 text-blue-600 bg-slate-900">
+            <label for="womenEnt" class="ml-2 text-xs text-slate-300">Women Entrepreneur (>50% stake) [-0.05%]</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="youthEnt" class="w-4 h-4 rounded border-slate-700 text-blue-600 bg-slate-900">
+            <label for="youthEnt" class="ml-2 text-xs text-slate-300">Youth Entrepreneur (18-35 yrs) [-0.05%]</label>
+          </div>
+        </div>
+
+        <button onclick="calculateAll()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-colors mt-2 shadow-sm">
+          Recalculate Matrices
+        </button>
+      </div>
+    </div>
+
+    <!-- CALCULATED RESULTS: 2 COLUMNS -->
+    <div class="lg:col-span-2 space-y-5">
+
+      <!-- PRICING & INTEREST RATE -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
+        <h3 class="text-md font-semibold text-blue-400 mb-3 flex items-center justify-between">
+          <span>1. Applicable Card Rate & ROI Breakdown</span>
+          <span id="mappedBreTag" class="text-xs bg-slate-700 text-slate-200 px-2 py-0.5 rounded font-mono"></span>
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-4">
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <div class="text-xs text-slate-400">Benchmark (EBLR)</div>
+            <div class="text-lg font-bold text-white mt-1" id="resEblr">7.90%</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <div class="text-xs text-slate-400">Gross Spread</div>
+            <div class="text-lg font-bold text-amber-400 mt-1" id="resSpread">+0.00%</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <div class="text-xs text-slate-400">Security Concession</div>
+            <div class="text-lg font-bold text-emerald-400 mt-1" id="resSecConc">-0.00%</div>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60 ring-1 ring-blue-500">
+            <div class="text-xs text-slate-400">Final Proposed ROI</div>
+            <div class="text-lg font-bold text-blue-400 mt-1" id="resFinalRoi">0.00%</div>
+          </div>
+        </div>
+        <div id="roiDetails" class="text-xs text-slate-400 bg-slate-900/60 p-3 rounded-lg border border-slate-700/40"></div>
+      </div>
+
+      <!-- SANCTIONING AUTHORITY & DELEGATION -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
+        <h3 class="text-md font-semibold text-blue-400 mb-3">2. Competent Sanctioning Authority (Table A3)</h3>
+        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div>
+            <div class="text-xs text-slate-400 uppercase tracking-wide">Competent Credit Committee</div>
+            <div class="text-xl font-bold text-emerald-400 mt-0.5" id="resSanctionAuth">RCC</div>
+            <div class="text-xs text-slate-300 mt-1" id="resAuthLimitSpan"></div>
+          </div>
+          <div class="text-left md:text-right border-t md:border-t-0 pt-2 md:pt-0 border-slate-800">
+            <div class="text-xs text-slate-400">Proposal Template</div>
+            <div class="text-sm font-semibold text-white" id="resProposalFormat">DDS-CUE V2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCESSING CHARGES & UPFRONT FEES -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
+        <h3 class="text-md font-semibold text-blue-400 mb-3">3. Applicable Processing & Upfront Fees (w.e.f. 01.06.2025)</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <span class="text-xs text-slate-400 block mb-1">Unified Loan Processing Fee (FB + NFB)</span>
+            <div class="font-bold text-white text-base" id="resProcessingFee">₹ 0</div>
+            <span class="text-xs text-slate-500 mt-1 block" id="resProcBasis"></span>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <span class="text-xs text-slate-400 block mb-1">Term Loan Upfront Fee (If Applicable)</span>
+            <div class="font-bold text-white text-base" id="resUpfrontFee">₹ 0</div>
+            <span class="text-xs text-slate-500 mt-1 block" id="resUpfrontBasis"></span>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2 italic">*Excludes GST. 50% payable on conveying sanction, 50% at documentation.</p>
+      </div>
+
+      <!-- DISCRETIONARY CONCESSIONARY POWERS -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
+        <h3 class="text-md font-semibold text-blue-400 mb-3">4. Discretionary Concession Powers Available</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border border-slate-700">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+              <tr>
+                <th class="p-2.5 border-b border-slate-700">Authority Level</th>
+                <th class="p-2.5 border-b border-slate-700">Service Charges Concession</th>
+                <th class="p-2.5 border-b border-slate-700">Interest Spread Concession / Floor</th>
+              </tr>
+            </thead>
+            <tbody id="concessionTableBody" class="divide-y divide-slate-700/60 text-slate-300">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CAPSA / SMA REPORTING MATRIX -->
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
+        <h3 class="text-md font-semibold text-blue-400 mb-3">5. CAPSA / Irregularity Reporting Structure</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <span class="font-semibold text-amber-400 block mb-1">SMA-0 Categorization</span>
+            <p id="resSma0Report" class="text-slate-300"></p>
+          </div>
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-700/60">
+            <span class="font-semibold text-red-400 block mb-1">SMA-1 & SMA-2 Categorization</span>
+            <p id="resSma1Report" class="text-slate-300"></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // --- PWA Service Worker Registration ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err));
+      });
+    }
+
+    // --- Dynamic Input Events ---
+    const exposureInput = document.getElementById('exposureCr');
+    exposureInput.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value) || 0;
+      const inLacs = (val * 100).toFixed(2);
+      const inInr = (val * 10000000).toLocaleString('en-IN');
+      document.getElementById('exposureInWords').innerText = `₹ ${inInr} (${inLacs} Lakhs)`;
+      calculateAll();
+    });
+
+    ['rating', 'eblr', 'dispensation', 'collateralLevel', 'borrowerType', 'womenEnt', 'youthEnt'].forEach(id => {
+      document.getElementById(id).addEventListener('change', calculateAll);
+    });
+
+    // Rating Mapping Helpers
+    function getRatingIndex(r) {
+      return parseInt(r.replace('SB', ''), 10);
+    }
+
+    function getBREMapping(rating) {
+      const idx = getRatingIndex(rating);
+      if (idx <= 5) return 'BRE 1';
+      if (idx === 6) return 'BRE 2';
+      if (idx === 7) return 'BRE 3';
+      if (idx === 8) return 'BRE 4-7';
+      if (idx === 9) return 'BRE 8-9';
+      return 'BRE 10';
+    }
+
+    function calculateAll() {
+      const rating = document.getElementById('rating').value;
+      const rIdx = getRatingIndex(rating);
+      const exposureCr = parseFloat(document.getElementById('exposureCr').value) || 0;
+      const exposureLacs = exposureCr * 100;
+      const eblr = parseFloat(document.getElementById('eblr').value) || 7.90;
+      const dispensation = document.getElementById('dispensation').value;
+      const colLevel = document.getElementById('collateralLevel').value;
+      const borrowerType = document.getElementById('borrowerType').value;
+      const isWomen = document.getElementById('womenEnt').checked;
+      const isYouth = document.getElementById('youthEnt').checked;
+
+      // 1. Mapped BRE
+      const bre = getBREMapping(rating);
+      document.getElementById('mappedBreTag').innerText = `Internal: ${bre} | CUE: CUE-${rIdx}`;
+
+      // 2. INTEREST RATE & SPREAD ENGINE
+      let spread = 0;
+      let secConcession = 0;
+
+      // Determine Slab based on exposure
+      // Slabs: <=1 Cr, 1 to 5 Cr, 5 to 7.5 Cr, 7.5 to 10 Cr, >10 Cr
+      if (dispensation === 'cgtmse') {
+        if (exposureCr <= 1.0) {
+          if (rIdx <= 5) { spread = 1.55; secConcession = 0.85; }
+          else if (rIdx <= 7) { spread = 1.70; secConcession = 0.85; }
+          else if (rIdx <= 9) { spread = 1.95; secConcession = 0.85; }
+          else if (rIdx === 10) { spread = 2.45; secConcession = 0.85; }
+          else if (rIdx <= 13) { spread = 3.45; secConcession = 0.50; }
+          else { spread = 4.70; secConcession = 0.50; }
+        } else if (exposureCr <= 5.0) {
+          if (rIdx <= 5) { spread = 1.45; secConcession = 0.80; }
+          else if (rIdx <= 7) { spread = 1.60; secConcession = 0.80; }
+          else if (rIdx <= 9) { spread = 1.85; secConcession = 0.80; }
+          else if (rIdx === 10) { spread = 2.35; secConcession = 0.80; }
+          else if (rIdx <= 13) { spread = 2.85; secConcession = 0.50; }
+          else { spread = 3.55; secConcession = 0.00; }
+        } else if (exposureCr <= 7.50) {
+          if (rIdx <= 5) { spread = 1.40; secConcession = 0.80; }
+          else if (rIdx <= 7) { spread = 1.55; secConcession = 0.80; }
+          else if (rIdx <= 9) { spread = 1.80; secConcession = 0.80; }
+          else if (rIdx === 10) { spread = 2.30; secConcession = 0.80; }
+          else if (rIdx <= 13) { spread = 2.80; secConcession = 0.50; }
+          else { spread = 4.00; secConcession = 0.50; }
+        } else { // 7.5 to 10 Cr or above
+          if (rIdx <= 5) { spread = 1.35; secConcession = 0.80; }
+          else if (rIdx <= 7) { spread = 1.50; secConcession = 0.80; }
+          else if (rIdx <= 9) { spread = 1.75; secConcession = 0.80; }
+          else if (rIdx === 10) { spread = 2.25; secConcession = 0.80; }
+          else if (rIdx <= 13) { spread = 2.75; secConcession = 0.50; }
+          else { spread = 4.00; secConcession = 0.50; }
+        }
+      } else {
+        // Tangible Collateral or Clean
+        let slabSpread = 0;
+        let cD = 0, cE = 0, cF = 0; // Concessions for >100%, 75-100%, 50-75%
+
+        if (exposureCr <= 1.0) {
+          if (rIdx <= 5) { slabSpread = 1.55; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 7) { slabSpread = 1.70; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 9) { slabSpread = 1.95; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx === 10) { slabSpread = 2.45; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 13) { slabSpread = 3.45; cD = 0.60; cE = 0.40; cF = 0.25; }
+          else { slabSpread = 4.70; cD = 0.60; cE = 0.40; cF = 0.25; }
+        } else if (exposureCr <= 5.0) {
+          if (rIdx <= 5) { slabSpread = 1.45; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 7) { slabSpread = 1.60; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 9) { slabSpread = 1.85; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx === 10) { slabSpread = 2.35; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 13) { slabSpread = 2.85; cD = 0.60; cE = 0.40; cF = 0.25; }
+          else { slabSpread = 3.55; cD = 0.60; cE = 0.40; cF = 0.25; }
+        } else if (exposureCr <= 7.50) {
+          if (rIdx <= 5) { slabSpread = 1.40; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 7) { slabSpread = 1.55; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 9) { slabSpread = 1.80; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx === 10) { slabSpread = 2.30; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 13) { slabSpread = 2.80; cD = 0.60; cE = 0.40; cF = 0.25; }
+          else { slabSpread = 4.00; cD = 0.60; cE = 0.40; cF = 0.25; }
+        } else if (exposureCr <= 10.0) {
+          if (rIdx <= 5) { slabSpread = 1.35; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 7) { slabSpread = 1.50; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 9) { slabSpread = 1.75; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx === 10) { slabSpread = 2.25; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 13) { slabSpread = 2.75; cD = 0.60; cE = 0.40; cF = 0.25; }
+          else { slabSpread = 4.00; cD = 0.60; cE = 0.40; cF = 0.25; }
+        } else {
+          // Above 10 Cr (Annexure-III Page 14)
+          if (rIdx <= 5) { slabSpread = 1.25; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 7) { slabSpread = 1.40; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 9) { slabSpread = 1.65; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx === 10) { slabSpread = 2.15; cD = 0.95; cE = 0.75; cF = 0.60; }
+          else if (rIdx <= 13) { slabSpread = 2.65; cD = 0.60; cE = 0.40; cF = 0.25; }
+          else { slabSpread = 3.95; cD = 0.60; cE = 0.40; cF = 0.25; }
         }
 
-        // Collateral Pricing Scheme discounts mapped dynamically from BRE ratings
-        function getCollateralSpread(sbRating, collateralKey) {
-            if (collateralKey === "usual") return null;
-            
-            // Map SB rating to BRE Rating
-            let breGroup = 0;
-            if (sbRating <= 5) breGroup = 1;      // BRE 1-3
-            else if (sbRating === 6) breGroup = 2; // BRE 4-5 group
-            else if (sbRating === 7) breGroup = 3; // BRE 6-7 group
-            else if (sbRating === 8) breGroup = 4; // BRE 8
-            else return null; // No collateral discount below hurdle rate (BRE-8)
-
-            // Return collateral revised EBLR Spread
-            const mapping = {
-                "50_75": { 1: 1.00, 2: 1.50, 3: 2.25, 4: 3.00 },
-                "75_100": { 1: 0.50, 2: 1.00, 3: 1.50, 4: 2.50 },
-                "above_100": { 1: 0.25, 2: 0.50, 3: 1.25, 4: 2.00 }
-            };
-
-            return mapping[collateralKey][breGroup] || null;
+        spread = slabSpread;
+        if (dispensation === 'collateral') {
+          if (colLevel === 'gt100') secConcession = cD;
+          else if (colLevel === '75_100') secConcession = cE;
+          else if (colLevel === '50_75') secConcession = cF;
+          else secConcession = 0;
+        } else {
+          secConcession = 0;
         }
+      }
 
-        // Processing fee schedule
-        function calculateFee(amountLakhs, sbRating) {
-            const amount = amountLakhs * 100000;
-            if (amount <= 50000) return "Nil";
-            if (amount <= 500000) return "Rs. 1,000";
-            if (amount <= 1000000) return "Rs. 2,000";
-            if (amount <= 5000000) return `Rs. ${(amount * 0.0040).toLocaleString('en-IN', {maximumFractionDigits: 0})} (0.40%)`;
-            
-            // For above 50 Lakhs
-            if (sbRating <= 4) {
-                return `Rs. ${(amount * 0.0050).toLocaleString('en-IN', {maximumFractionDigits: 0})} (0.50%)`;
-            } else if (sbRating <= 10) {
-                return `Rs. ${(amount * 0.0075).toLocaleString('en-IN', {maximumFractionDigits: 0})} (0.75%)`;
-            } else {
-                return `Rs. ${(amount * 0.0100).toLocaleString('en-IN', {maximumFractionDigits: 0})} (1.00%)`;
-            }
+      // Add-on concession: Women / Youth
+      let addlConcession = 0;
+      if (isWomen) addlConcession += 0.05;
+      if (isYouth) addlConcession += 0.05;
+
+      const finalRoi = eblr + spread - secConcession - addlConcession;
+
+      document.getElementById('resEblr').innerText = `${eblr.toFixed(2)}%`;
+      document.getElementById('resSpread').innerText = `+${spread.toFixed(2)}%`;
+      document.getElementById('resSecConc').innerText = `-${(secConcession + addlConcession).toFixed(2)}%`;
+      document.getElementById('resFinalRoi').innerText = `${finalRoi.toFixed(2)}%`;
+
+      document.getElementById('roiDetails').innerHTML = `
+        <strong>Formula:</strong> Proposed ROI = EBLR (${eblr.toFixed(2)}%) + Spread (${spread.toFixed(2)}%) 
+        - Security Rebate (${secConcession.toFixed(2)}%) 
+        ${addlConcession > 0 ? `- Special Concession (${addlConcession.toFixed(2)}%)` : ''} 
+        = <strong>${finalRoi.toFixed(2)}% p.a.</strong>
+      `;
+
+      // 3. SANCTIONING AUTHORITY ENGINE (TABLE A3)
+      let auth = "Above CLCC (CCSC / CCCC / ECCB)";
+      let limitSpan = "";
+      const isGoodRating = rIdx <= 5; // SB-1 to SB-5 / CUE-1 to CUE-5
+
+      if (borrowerType === 'corporate') {
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 25.0 : 22.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 35.0 : 30.0)) auth = "CLCC";
+        limitSpan = `Max Limit for Corporate: RCC ≤ ₹7 Cr | ZCC ≤ ₹${isGoodRating ? 25 : 22} Cr | CLCC ≤ ₹${isGoodRating ? 35 : 30} Cr`;
+      } else if (borrowerType === 'non_corporate') {
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 10.0 : 8.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 15.0 : 10.0)) auth = "CLCC";
+        limitSpan = `Max Limit for Non-Corp: RCC ≤ ₹7 Cr | ZCC ≤ ₹${isGoodRating ? 10 : 8} Cr | CLCC ≤ ₹${isGoodRating ? 15 : 10} Cr`;
+      } else { // Individual
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 8.0 : 7.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 10.0 : 8.0)) auth = "CLCC";
+        limitSpan = `Max Limit for Individual: RCC ≤ ₹7 Cr | ZCC ≤ ₹${isGoodRating ? 8 : 7} Cr | CLCC ≤ ₹${isGoodRating ? 10 : 8} Cr`;
+      }
+
+      document.getElementById('resSanctionAuth').innerText = auth;
+      document.getElementById('resAuthLimitSpan').innerText = limitSpan;
+
+      // 4. PROPOSAL TEMPLATE FORMAT
+      let pFormat = "";
+      if (exposureCr < 0.10) {
+        pFormat = "Mudra Format (Limit < ₹10 Lakhs)";
+      } else if (exposureCr <= 0.50) {
+        pFormat = "CAF - Project Pratham (₹10L to ₹50L)";
+      } else if (exposureCr <= 50.0) {
+        pFormat = "Form DDS-CUE V2 / DDS Sanction Format (₹50L to ₹50 Cr)";
+      } else {
+        pFormat = "Form DD (Due Diligence) & Form S (Sanction Format) (> ₹50 Cr)";
+      }
+      document.getElementById('resProposalFormat').innerText = pFormat;
+
+      // 5. UNIFIED PROCESSING & UPFRONT CHARGES (Circular 01.06.2025)
+      let procFee = 0;
+      let procBasis = "";
+      const exposureINR = exposureCr * 10000000;
+
+      if (exposureINR <= 50000) {
+        procFee = 0; procBasis = "Nil (Limit up to ₹50,000)";
+      } else if (exposureINR <= 500000) {
+        procFee = 1000; procBasis = "Flat ₹1,000 (₹50,000 to ₹5 Lakhs)";
+      } else if (exposureINR <= 1000000) {
+        procFee = 2000; procBasis = "Flat ₹2,000 (₹5 Lakhs to ₹10 Lakhs)";
+      } else if (exposureINR <= 5000000) {
+        procFee = exposureINR * 0.0040;
+        procBasis = "0.40% of loan amount (₹10L to ₹50L)";
+      } else if (exposureINR <= 500000000) { // Up to 50 Cr
+        if (rIdx <= 4) {
+          procFee = exposureINR * 0.0050;
+          procBasis = "0.50% of loan amount (SB1-SB4)";
+        } else if (rIdx <= 10) {
+          procFee = exposureINR * 0.0075;
+          procBasis = "0.75% of loan amount (SB5-SB10)";
+        } else {
+          procFee = exposureINR * 0.0100;
+          procBasis = "1.00% of loan amount (SB11 and below / unrated)";
         }
-
-        // Recommended Proposal formats based on overall exposure
-        function getProposalFormat(exposureCr) {
-            if (exposureCr < 0.10) return "Mudra Format";
-            if (exposureCr <= 0.50) return "Common Appraisal Form (CAF) - Project Pratham";
-            if (exposureCr <= 1.00) return "S2 Format (Stand Up India, CGTMSE)";
-            if (exposureCr <= 50.00) return "DDS-CUE V2 Format";
-            return "Form DD: Loan Proposal Due Diligence & Form S: Loan Sanction Format";
+      } else { // Above 50 Cr
+        if (rIdx <= 4) {
+          procFee = Math.max(2500000, exposureINR * 0.0025);
+          procBasis = "0.25% of loan amount (Min ₹25 Lakhs)";
+        } else if (rIdx <= 10) {
+          procFee = Math.max(3750000, exposureINR * 0.0050);
+          procBasis = "0.50% of loan amount (Min ₹37.5 Lakhs)";
+        } else {
+          procFee = Math.max(5000000, exposureINR * 0.0100);
+          procBasis = "1.00% of loan amount (Min ₹50 Lakhs)";
         }
+      }
 
-        // Calculation Orchestration
-        function calculate() {
-            const sbRating = parseInt(document.getElementById('sbRating').value);
-            const exposureVal = parseFloat(document.getElementById('exposure').value) / 10; // Convert range (1-1000) to Cr (0.1 - 100.0)
-            const eblr = parseFloat(document.getElementById('eblr').value);
-            const collateral = document.getElementById('collateral').value;
+      // Upfront fee on Term loans
+      let upfrontFee = 0;
+      let upfrontBasis = "";
+      if (rIdx <= 4) {
+        upfrontFee = exposureINR * 0.0125;
+        upfrontBasis = "1.25% of Loan Amount (SB1 to SB4)";
+      } else if (rIdx <= 10) {
+        upfrontFee = exposureINR * 0.0150;
+        upfrontBasis = "1.50% of Loan Amount (SB5 to SB10)";
+      } else {
+        upfrontFee = exposureINR * 0.0200;
+        upfrontBasis = "2.00% of Loan Amount (SB11 & below)";
+      }
 
-            // UI updates
-            document.getElementById('exposureVal').innerText = `${exposureVal.toFixed(2)} Crores`;
-            document.getElementById('eblrVal').innerText = `${eblr.toFixed(2)}%`;
-            document.getElementById('calcEblr').innerText = `${eblr.toFixed(2)}%`;
+      document.getElementById('resProcessingFee').innerText = `₹ ${Math.round(procFee).toLocaleString('en-IN')}`;
+      document.getElementById('resProcBasis').innerText = procBasis;
+      document.getElementById('resUpfrontFee').innerText = `₹ ${Math.round(upfrontFee).toLocaleString('en-IN')}`;
+      document.getElementById('resUpfrontBasis').innerText = upfrontBasis;
 
-            // Operational Details Update
-            const metrics = ratingMetrics[sbRating];
-            document.getElementById('scoreRange').innerText = metrics.range;
-            document.getElementById('comfortLevel').innerText = metrics.comfort;
-            document.getElementById('riskLevel').innerText = metrics.risk;
-            document.getElementById('proposalFormat').innerText = getProposalFormat(exposureVal);
-            document.getElementById('processingFee').innerText = calculateFee(exposureVal * 100, sbRating);
+      // 6. DISCRETIONARY CONCESSION POWERS
+      const tableBody = document.getElementById('concessionTableBody');
+      const isEligibleForFullConc = rIdx <= 10; // SB-1 to SB-10
 
-            // Card Rates Calculations
-            const standard = getStandardSpreadAndConcession(sbRating, exposureVal);
-            let finalSpread = standard.spread;
-            let standardConcession = standard.concession;
-            let collateralSpread = getCollateralSpread(sbRating, collateral);
-
-            // Collateral pricing overrides spread logic if applicable
-            if (collateralSpread !== null) {
-                finalSpread = collateralSpread;
-                standardConcession = 0.0; // Concession is waived under collateral-linked scheme
-                document.getElementById('calcSpread').innerText = `+${collateralSpread.toFixed(2)}%`;
-                document.getElementById('calcConcession').innerText = `0.00% (Collateral Applied)`;
-                document.getElementById('calcCollateral').innerText = "Active (Revised)";
-                document.getElementById('collateralPricingRow').classList.remove('hidden');
-            } else {
-                document.getElementById('calcSpread').innerText = `+${standard.spread.toFixed(2)}%`;
-                document.getElementById('calcConcession').innerText = `-${standard.concession.toFixed(2)}%`;
-                document.getElementById('collateralPricingRow').classList.add('hidden');
-            }
-
-            // Calculations execution
-            const roi = eblr + finalSpread - standardConcession;
-            document.getElementById('finalRoi').innerText = `${roi.toFixed(2)}%`;
+      let rows = [
+        {
+          auth: 'RCC',
+          serv: 'NIL Concession',
+          roi: 'No Concession'
+        },
+        {
+          auth: 'ZCC',
+          serv: isEligibleForFullConc ? 'Up to 10%' : 'NIL',
+          roi: 'Spread concession: 10% (Floor: MCLR/EBR + 90 bps)'
+        },
+        {
+          auth: 'CLCC',
+          serv: isEligibleForFullConc ? 'Up to 50%' : 'NIL',
+          roi: 'Spread concession: 25% (Floor: MCLR/EBR + 70 bps)'
+        },
+        {
+          auth: 'RCCC / CCSC',
+          serv: 'FULL (100%)',
+          roi: 'Spread concession: 100% (Floor: Tenor MCLR or EBR)'
+        },
+        {
+          auth: 'GM (NW)',
+          serv: 'Up to 30% (LC/BG issuance)',
+          roi: isGoodRating ? 'Floor up to EBR + 60 bps' : 'Floor up to EBR + 125 bps'
+        },
+        {
+          auth: 'CGM (Circle)',
+          serv: isEligibleForFullConc ? 'Up to 75%' : 'Up to 50%',
+          roi: isGoodRating ? 'Floor up to EBR + 35 bps' : 'Floor up to EBR + 100 bps'
+        },
+        {
+          auth: 'DMD (Business Verticals)',
+          serv: 'FULL (100%)',
+          roi: 'Floor up to EBR used in pricing of loan'
         }
+      ];
 
-        // Event binding
-        document.getElementById('sbRating').addEventListener('change', calculate);
-        document.getElementById('exposure').addEventListener('input', calculate);
-        document.getElementById('eblr').addEventListener('input', calculate);
-        document.getElementById('collateral').addEventListener('change', calculate);
+      tableBody.innerHTML = rows.map(r => `
+        <tr class="hover:bg-slate-700/30">
+          <td class="p-2.5 font-medium text-white">${r.auth}</td>
+          <td class="p-2.5">${r.serv}</td>
+          <td class="p-2.5">${r.roi}</td>
+        </tr>
+      `).join('');
 
-        // Initial launch
-        calculate();
+      // 7. CAPSA / SMA REPORTING
+      let sma0Text = "";
+      let sma1Text = "";
 
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
+      if (exposureCr <= 1.0) {
+        sma0Text = "Reporting by way of simple listing to AGMs of Credit CPCs / Controller not below AGM (Monthly).";
+        sma1Text = "Reporting by way of simple listing to AGMs of Credit CPCs / Controller not below AGM (Monthly).";
+      } else if (exposureCr <= 3.0) {
+        sma0Text = "Submit to Controller not below rank of AGM or DGM-Branch Head (Monthly).";
+        sma1Text = "Submit to Controller not below rank of DGM (B&O) (Monthly).";
+      } else {
+        sma0Text = auth === 'RCC' ? "Submit to Controller not below AGM/DGM-Branch Head (Monthly)." : "Submit to Controller not below rank of DGM (B&O) (Monthly).";
+        sma1Text = "Jointly by GM (NW) and DGM & CCO. If sanctioned by RCCC/CCSC: to CGM (Circle).";
+      }
+
+      document.getElementById('resSma0Report').innerText = sma0Text;
+      document.getElementById('resSma1Report').innerText = sma1Text;
+    }
+
+    // Initial Calculation on Load
+    calculateAll();
+  </script>
 </body>
 </html>
-File 2: manifest.json
-
-This metadata file lets browsers (both Android/iOS and Desktop Chrome/Safari) recognize your code as an installable application. Create a file named manifest.json in the same folder:
-{
-  "short_name": "SBRoiPortal",
-  "name": "SB Rating & ROI App",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/584/584026.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#0f172a",
-  "theme_color": "#1e3a8a",
-  "display": "standalone",
-  "orientation": "portrait"
-}
-File 3: sw.js
-
-This is the Service Worker script that facilitates instant, 100% offline access when you are in cellular-dead spots. Create a file named sw.js in the same folder:
-JavaScript
-const CACHE_NAME = 'sb-roi-v1';
-const ASSETS = [
-  './index.html',
-  './manifest.json'
-];
-
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
-});
-
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
-  );
-});
