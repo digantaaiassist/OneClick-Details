@@ -4,19 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1e40af">
-  <title>SBI Credit Matrix & Sanction Engine V2</title>
+  <title>SBI Credit Matrix & Sanction Engine V3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .result-card { transition: all 0.2s ease-in-out; }
     .result-card:hover { transform: translateY(-2px); }
-    /* Hide scrollbar for clean tables */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-  <!-- Header -->
   <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 mb-6 shadow-md sticky top-0 z-30">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
       <div>
@@ -37,7 +35,6 @@
         <h2 class="text-sm font-semibold text-white mb-4 border-b border-slate-700 pb-2 uppercase tracking-wide">Primary Parameters</h2>
         <div class="space-y-4 text-sm">
           
-          <!-- Rating Sync Block -->
           <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 space-y-3">
             <div>
               <label class="block text-slate-300 font-medium mb-1 text-xs">SB Rating (CRA/CUE)</label>
@@ -155,18 +152,22 @@
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
           <div class="text-xs text-slate-400">Card Base ROI</div>
           <div class="text-xl font-bold text-white mt-1" id="resFinalRoi">0.00%</div>
+          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resRoiRationale">(eblr + spread - rebates)</span>
         </div>
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
           <div class="text-xs text-slate-400">Total Processing Fee</div>
           <div class="text-xl font-bold text-white mt-1" id="resProcessingFee">₹ 0</div>
+          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resProcRationale">(fee calculation basis)</span>
         </div>
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
           <div class="text-xs text-slate-400">LC/BG Card Comm.</div>
           <div class="text-xl font-bold text-white mt-1" id="resBgFee">₹ 0 <span class="text-[10px] font-normal text-slate-400">/yr</span></div>
+          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resBgRationale">(amount * rate)</span>
         </div>
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm border-l-4 border-l-emerald-500">
           <div class="text-xs text-slate-400">Sanction Authority</div>
           <div class="text-xl font-bold text-emerald-400 mt-1" id="resSanctionAuth">RCC</div>
+          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resAuthRationale">(based on exposure)</span>
         </div>
       </div>
 
@@ -217,7 +218,7 @@
       <!-- TABLE 3: LC / BG CONCESSIONS -->
       <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 result-card">
         <h3 class="text-md font-semibold text-blue-400 mb-3">3. LC / BG Issuance Charges & Concessions</h3>
-        <div class="flex gap-4 mb-4 text-xs">
+        <div class="flex gap-4 mb-4 text-xs flex-wrap">
           <div class="bg-slate-900 py-1.5 px-3 rounded border border-slate-700">Applicable Rate: <strong id="bgRateApplied" class="text-white">0%</strong></div>
           <div class="bg-slate-900 py-1.5 px-3 rounded border border-slate-700">Margin Rebate: <strong id="bgMarginRebate" class="text-emerald-400">0%</strong></div>
           <div class="bg-slate-900 py-1.5 px-3 rounded border border-slate-700">Net Card Fee: <strong id="bgNetFee" class="text-white">₹0</strong> / year</div>
@@ -250,7 +251,6 @@
       'SB10':'BRE10', 'SB11':'BRE10', 'SB12':'BRE10', 'SB13':'BRE10', 'SB14':'BRE10', 'SB15':'BRE10', 'SB16':'BRE10'
     };
     
-    // Representative mapping from BRE back to SB (taking the highest score in that BRE bracket)
     const breToSb = {
       'BRE1':'SB01', 'BRE2':'SB06', 'BRE3':'SB07', 'BRE4-7':'SB08', 'BRE8-9':'SB09', 'BRE10':'SB10'
     };
@@ -258,7 +258,6 @@
     const ratingEl = document.getElementById('rating');
     const breEl = document.getElementById('breRating');
 
-    // Bidirectional sync listeners
     ratingEl.addEventListener('change', (e) => {
       breEl.value = sbToBre[e.target.value];
       calculateAll();
@@ -269,21 +268,22 @@
       calculateAll();
     });
 
-    // Attach listeners to all other inputs
     ['exposureCr', 'eblr', 'dispensation', 'collateralLevel', 'womenEnt', 'youthEnt', 'bgAmountLacs', 'bgMargin', 'prioritySector'].forEach(id => {
       document.getElementById(id).addEventListener('change', calculateAll);
-      document.getElementById(id).addEventListener('input', calculateAll); // for smooth number input response
+      document.getElementById(id).addEventListener('input', calculateAll);
     });
 
-    // Format currency helper
     const formatINR = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+    const formatCrLacs = (cr) => {
+      if(cr >= 1) return `₹${cr} Cr`;
+      return `₹${cr * 100} Lakhs`;
+    };
 
     function calculateAll() {
-      // Inputs
       const rating = ratingEl.value;
       const rIdx = parseInt(rating.replace('SB', ''), 10);
-      const isGoodRating = rIdx <= 5; // SB1-SB5
-      const isEligibleForFullConc = rIdx <= 10; // SB1-SB10
+      const isGoodRating = rIdx <= 5; 
+      const isEligibleForFullConc = rIdx <= 10; 
       
       const exposureCr = parseFloat(document.getElementById('exposureCr').value) || 0;
       const exposureINR = exposureCr * 10000000;
@@ -291,7 +291,6 @@
       const dispensation = document.getElementById('dispensation').value;
       const colLevel = document.getElementById('collateralLevel').value;
       
-      // bg inputs
       const bgAmountINR = (parseFloat(document.getElementById('bgAmountLacs').value) || 0) * 100000;
       const bgMargin = parseInt(document.getElementById('bgMargin').value);
       const isPriority = document.getElementById('prioritySector').checked;
@@ -301,7 +300,6 @@
       // ==========================================
       let spread = 0, secConcession = 0, addlConcession = 0;
       
-      // (Simplified logic mirroring exact slab structure provided in doc)
       if (dispensation === 'cgtmse') {
         if (exposureCr <= 1.0) spread = rIdx<=5?1.55 : rIdx<=7?1.70 : rIdx<=9?1.95 : rIdx===10?2.45 : rIdx<=13?3.45 : 4.70;
         else if (exposureCr <= 5.0) spread = rIdx<=5?1.45 : rIdx<=7?1.60 : rIdx<=9?1.85 : rIdx===10?2.35 : rIdx<=13?2.85 : 3.55;
@@ -331,83 +329,93 @@
       if (document.getElementById('youthEnt').checked) addlConcession += 0.05;
 
       const cardROI = eblr + spread - secConcession - addlConcession;
+      const totalRebate = secConcession + addlConcession;
+      
       document.getElementById('resFinalRoi').innerText = `${cardROI.toFixed(2)}%`;
-      document.getElementById('txtExpForRoi').innerText = exposureCr.toLocaleString('en-IN');
+      document.getElementById('txtExpForRoi').innerText = exposureCr.toLocaleString('en-IN') + ' Cr';
+      document.getElementById('resRoiRationale').innerText = `(${eblr.toFixed(2)}% eblr + ${spread.toFixed(2)}% spread - ${totalRebate.toFixed(2)}% rebate)`;
 
       // ==========================================
       // 2. PROCESSING FEE CALCULATION
       // ==========================================
       let procFee = 0;
-      if (exposureINR <= 50000) procFee = 0;
-      else if (exposureINR <= 500000) procFee = 1000;
-      else if (exposureINR <= 1000000) procFee = 2000;
-      else if (exposureINR <= 5000000) procFee = exposureINR * 0.0040;
+      let procRateDesc = "";
+      
+      if (exposureINR <= 50000) { procFee = 0; procRateDesc = "Nil (<= ₹50k)"; }
+      else if (exposureINR <= 500000) { procFee = 1000; procRateDesc = "Flat ₹1k (<= ₹5L)"; }
+      else if (exposureINR <= 1000000) { procFee = 2000; procRateDesc = "Flat ₹2k (<= ₹10L)"; }
+      else if (exposureINR <= 5000000) { procFee = exposureINR * 0.0040; procRateDesc = `(₹${exposureINR} * 0.40%)`; }
       else if (exposureINR <= 500000000) {
-        procFee = exposureINR * (rIdx<=4 ? 0.0050 : rIdx<=10 ? 0.0075 : 0.0100);
+        let ratePct = rIdx<=4 ? 0.50 : rIdx<=10 ? 0.75 : 1.00;
+        procFee = exposureINR * (ratePct/100);
+        procRateDesc = `(₹${exposureINR} * ${ratePct.toFixed(2)}%)`;
       } else {
-        procFee = Math.max(
-          rIdx<=4 ? 2500000 : rIdx<=10 ? 3750000 : 5000000, 
-          exposureINR * (rIdx<=4 ? 0.0025 : rIdx<=10 ? 0.0050 : 0.0100)
-        );
+        let ratePct = rIdx<=4 ? 0.25 : rIdx<=10 ? 0.50 : 1.00;
+        let minCap = rIdx<=4 ? 2500000 : rIdx<=10 ? 3750000 : 5000000;
+        let calculated = exposureINR * (ratePct/100);
+        procFee = Math.max(minCap, calculated);
+        procRateDesc = calculated < minCap ? `(Min cap ₹${minCap/100000}L applied)` : `(₹${exposureINR} * ${ratePct.toFixed(2)}%)`;
       }
+      
       document.getElementById('resProcessingFee').innerText = formatINR(procFee);
+      document.getElementById('resProcRationale').innerText = procRateDesc.toLowerCase();
       document.getElementById('txtStdProcFee').innerText = formatINR(procFee);
 
       // ==========================================
       // 3. BG / LC FEE CALCULATION
       // ==========================================
-      let bgRate = 0;
-      if(isPriority) bgRate = rIdx<=4 ? 1.20 : rIdx<=10 ? 1.35 : 2.20;
-      else bgRate = rIdx<=4 ? 1.60 : rIdx<=10 ? 1.80 : 2.20;
-
+      let bgRate = isPriority ? (rIdx<=4 ? 1.20 : rIdx<=10 ? 1.35 : 2.20) : (rIdx<=4 ? 1.60 : rIdx<=10 ? 1.80 : 2.20);
       let effectiveBgRate = bgRate;
       let bgRebateDesc = "0%";
+      
       if(bgMargin === 100) { effectiveBgRate = bgRate * 0.25; bgRebateDesc = "75% (100% Cash Margin)"; }
       else if(bgMargin === 50) { effectiveBgRate = bgRate * 0.50; bgRebateDesc = "50% (50% Cash Margin)"; }
 
       let baseBgFeeYearly = bgAmountINR * (effectiveBgRate / 100);
-      // Minimum Rs 600 logic
-      if(baseBgFeeYearly < 600) baseBgFeeYearly = 600;
+      let minBgNote = "";
+      if(baseBgFeeYearly < 600) {
+        baseBgFeeYearly = 600;
+        minBgNote = " (min ₹600 cap)";
+      }
 
       document.getElementById('bgRateApplied').innerText = `${bgRate.toFixed(2)}%`;
       document.getElementById('bgMarginRebate').innerText = bgRebateDesc;
       document.getElementById('resBgFee').innerHTML = `${formatINR(baseBgFeeYearly)} <span class="text-[10px] font-normal text-slate-400">/yr</span>`;
       document.getElementById('bgNetFee').innerText = formatINR(baseBgFeeYearly);
+      document.getElementById('resBgRationale').innerText = minBgNote ? `(min cap applied)` : `(₹${bgAmountINR} * ${effectiveBgRate.toFixed(2)}%)`;
 
-      // Sanction Auth Simple mapping (Corporate basis)
+      // Sanction Auth
       let auth = exposureCr <= 7.0 ? "RCC" : exposureCr <= (isGoodRating?25:22) ? "ZCC" : "CLCC / Above";
       document.getElementById('resSanctionAuth').innerText = auth;
+      document.getElementById('resAuthRationale').innerText = `(based on ${formatCrLacs(exposureCr)} exp)`;
 
       // ==========================================
       // 4. GENERATE INTEREST LOSS TABLE
       // ==========================================
       const roiHtml = [];
-      const ebrValue = eblr; // eblr input
-      
-      // Calculate Floor ROI rules
-      const zccFloor = ebrValue + 0.90; 
-      const clccFloor = ebrValue + 0.70;
-      const gmFloor = ebrValue + (isGoodRating ? 0.60 : 1.25);
-      const cgmFloor = ebrValue + (isGoodRating ? 0.35 : 1.00);
-      const dmdFloor = ebrValue;
+      const zccFloor = eblr + 0.90; 
+      const clccFloor = eblr + 0.70;
+      const gmFloor = eblr + (isGoodRating ? 0.60 : 1.25);
+      const cgmFloor = eblr + (isGoodRating ? 0.35 : 1.00);
+      const dmdFloor = eblr;
 
       const buildRoiRow = (title, condition, floorRoi) => {
         if(condition === 'NIL') {
           return `<tr><td class="p-3 font-medium text-white">${title}</td><td class="p-3 text-slate-500">NIL</td><td class="p-3 text-slate-500">-</td><td class="p-3 text-right text-slate-500">₹0</td></tr>`;
         }
         
-        let actualFloor = Math.max(floorRoi, dmdFloor); // cannot go below EBR
+        let actualFloor = Math.max(floorRoi, dmdFloor); 
         let maxConcessionROI = cardROI - actualFloor; 
-        if(maxConcessionROI < 0) maxConcessionROI = 0; // If card rate is already below floor
+        if(maxConcessionROI < 0) maxConcessionROI = 0; 
         
         const finalRoi = cardROI - maxConcessionROI;
         const lossAmount = exposureINR * (maxConcessionROI / 100);
         
         return `<tr class="hover:bg-slate-700/30">
           <td class="p-3 font-medium text-white">${title}</td>
-          <td class="p-3">${condition} (Floor: ${actualFloor.toFixed(2)}%)</td>
+          <td class="p-3">${condition}<br><span class="text-[9px] text-slate-500 lowercase">(floor: ${actualFloor.toFixed(2)}%)</span></td>
           <td class="p-3 text-emerald-400 font-semibold">${finalRoi.toFixed(2)}%</td>
-          <td class="p-3 text-right text-red-400 font-mono">${formatINR(lossAmount)}</td>
+          <td class="p-3 text-right text-red-400 font-mono">${formatINR(lossAmount)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${exposureCr}cr * ${maxConcessionROI.toFixed(2)}%)</span></td>
         </tr>`;
       };
 
@@ -431,7 +439,7 @@
           <td class="p-3 font-medium text-white">${title}</td>
           <td class="p-3">${pctAllowed}% Waiver</td>
           <td class="p-3 text-emerald-400 font-semibold">${formatINR(finalFee)}</td>
-          <td class="p-3 text-right text-red-400 font-mono">${formatINR(loss)}</td>
+          <td class="p-3 text-right text-red-400 font-mono">${formatINR(loss)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${procFee} * ${pctAllowed}%)</span></td>
         </tr>`;
       };
 
@@ -448,15 +456,16 @@
       // ==========================================
       const bgHtml = [];
       const buildBgRow = (title, pctAllowed) => {
-        const loss = baseBgFeeYearly * (pctAllowed/100);
-        const finalFee = Math.max(600, baseBgFeeYearly - loss); // Cannot breach Rs 600 min
+        const theoreticalLoss = baseBgFeeYearly * (pctAllowed/100);
+        const finalFee = Math.max(600, baseBgFeeYearly - theoreticalLoss);
         const actLoss = baseBgFeeYearly - finalFee;
+        const note = finalFee === 600 && pctAllowed > 0 ? " (min cap hit)" : "";
         
         return `<tr class="hover:bg-slate-700/30">
           <td class="p-3 font-medium text-white">${title}</td>
           <td class="p-3">${pctAllowed}% Waiver</td>
           <td class="p-3 text-emerald-400 font-semibold">${formatINR(finalFee)}</td>
-          <td class="p-3 text-right text-red-400 font-mono">${formatINR(actLoss)}</td>
+          <td class="p-3 text-right text-red-400 font-mono">${formatINR(actLoss)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${baseBgFeeYearly} * ${pctAllowed}%${note})</span></td>
         </tr>`;
       };
 
@@ -468,7 +477,6 @@
       document.getElementById('bgTableBody').innerHTML = bgHtml.join('');
     }
 
-    // Initial Trigger
     calculateAll();
   </script>
 </body>
