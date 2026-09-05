@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1e40af">
-  <title>SBI Credit Matrix & Sanction Engine V3</title>
+  <title>SBI Credit Matrix & Sanction Engine V4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .result-card { transition: all 0.2s ease-in-out; }
@@ -71,6 +71,15 @@
                 <option value="BRE10">BRE 10 (or Unrated)</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">Borrower Entity Type</label>
+            <select id="borrowerType" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:ring-2 focus:ring-blue-500">
+              <option value="corporate">Corporate</option>
+              <option value="non_corporate">Non-Corporate</option>
+              <option value="individual">Individual</option>
+            </select>
           </div>
 
           <div>
@@ -167,7 +176,7 @@
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm border-l-4 border-l-emerald-500">
           <div class="text-xs text-slate-400">Sanction Authority</div>
           <div class="text-xl font-bold text-emerald-400 mt-1" id="resSanctionAuth">RCC</div>
-          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resAuthRationale">(based on exposure)</span>
+          <span class="text-[10px] text-slate-400 block mt-1 lowercase" id="resAuthRationale">(based on entity & exposure)</span>
         </div>
       </div>
 
@@ -176,15 +185,15 @@
         <h3 class="text-md font-semibold text-blue-400 mb-3 flex items-center justify-between">
           <span>1. Interest Rate Concessions & Revenue Loss</span>
         </h3>
-        <p class="text-xs text-slate-400 mb-4">Shows maximum discretionary power per authority, the lowest permissible ROI (Floor), and the annual interest revenue lost if fully utilized based on ₹<span id="txtExpForRoi"></span> exposure.</p>
+        <p class="text-xs text-slate-400 mb-4">Shows maximum discretionary power per authority along with their specific guideline limits, the lowest permissible ROI (Floor), and the annual interest revenue lost if fully utilized based on ₹<span id="txtExpForRoi"></span> exposure.</p>
         
         <div class="overflow-x-auto no-scrollbar">
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
               <tr>
                 <th class="p-3 rounded-tl-lg">Authority</th>
-                <th class="p-3">Max Permissible Concession / Floor</th>
-                <th class="p-3">Lowest Possible ROI</th>
+                <th class="p-3">Official Concession Guideline</th>
+                <th class="p-3">Lowest Possible ROI (Floor)</th>
                 <th class="p-3 text-right rounded-tr-lg">Annual Int. Loss (Max)</th>
               </tr>
             </thead>
@@ -204,7 +213,7 @@
             <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
               <tr>
                 <th class="p-3 rounded-tl-lg">Authority</th>
-                <th class="p-3">Max % Concession</th>
+                <th class="p-3">Official Concession Guideline</th>
                 <th class="p-3">Final Fee Charged</th>
                 <th class="p-3 text-right rounded-tr-lg">Fee Revenue Loss (Max)</th>
               </tr>
@@ -229,7 +238,7 @@
             <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
               <tr>
                 <th class="p-3 rounded-tl-lg">Authority</th>
-                <th class="p-3">Max % Concession</th>
+                <th class="p-3">Official Concession Guideline</th>
                 <th class="p-3">Final LC/BG Fee/Yr</th>
                 <th class="p-3 text-right rounded-tr-lg">Annual Fee Loss (Max)</th>
               </tr>
@@ -268,7 +277,7 @@
       calculateAll();
     });
 
-    ['exposureCr', 'eblr', 'dispensation', 'collateralLevel', 'womenEnt', 'youthEnt', 'bgAmountLacs', 'bgMargin', 'prioritySector'].forEach(id => {
+    ['borrowerType', 'exposureCr', 'eblr', 'dispensation', 'collateralLevel', 'womenEnt', 'youthEnt', 'bgAmountLacs', 'bgMargin', 'prioritySector'].forEach(id => {
       document.getElementById(id).addEventListener('change', calculateAll);
       document.getElementById(id).addEventListener('input', calculateAll);
     });
@@ -285,6 +294,7 @@
       const isGoodRating = rIdx <= 5; 
       const isEligibleForFullConc = rIdx <= 10; 
       
+      const borrowerType = document.getElementById('borrowerType').value;
       const exposureCr = parseFloat(document.getElementById('exposureCr').value) || 0;
       const exposureINR = exposureCr * 10000000;
       const eblr = parseFloat(document.getElementById('eblr').value) || 7.90;
@@ -384,19 +394,47 @@
       document.getElementById('bgNetFee').innerText = formatINR(baseBgFeeYearly);
       document.getElementById('resBgRationale').innerText = minBgNote ? `(min cap applied)` : `(₹${bgAmountINR} * ${effectiveBgRate.toFixed(2)}%)`;
 
-      // Sanction Auth
-      let auth = exposureCr <= 7.0 ? "RCC" : exposureCr <= (isGoodRating?25:22) ? "ZCC" : "CLCC / Above";
+      // ==========================================
+      // TABLE A3 SANCTION AUTHORITY (Corporate/Non-Corporate/Individual)
+      // ==========================================
+      let auth = "Above CLCC (CCSC / CCCC / ECCB)";
+      let limitSpan = "";
+      
+      if (borrowerType === 'corporate') {
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 25.0 : 22.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 35.0 : 30.0)) auth = "CLCC";
+        limitSpan = `(Corporate Max: RCC ≤ ₹7Cr | ZCC ≤ ₹${isGoodRating ? 25 : 22}Cr | CLCC ≤ ₹${isGoodRating ? 35 : 30}Cr)`;
+      } else if (borrowerType === 'non_corporate') {
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 10.0 : 8.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 15.0 : 10.0)) auth = "CLCC";
+        limitSpan = `(Non-Corp Max: RCC ≤ ₹7Cr | ZCC ≤ ₹${isGoodRating ? 10 : 8}Cr | CLCC ≤ ₹${isGoodRating ? 15 : 10}Cr)`;
+      } else { // Individual
+        if (exposureCr <= 7.0) auth = "RCC";
+        else if (exposureCr <= (isGoodRating ? 8.0 : 7.0)) auth = "ZCC";
+        else if (exposureCr <= (isGoodRating ? 10.0 : 8.0)) auth = "CLCC";
+        limitSpan = `(Individual Max: RCC ≤ ₹7Cr | ZCC ≤ ₹${isGoodRating ? 8 : 7}Cr | CLCC ≤ ₹${isGoodRating ? 10 : 8}Cr)`;
+      }
+      
       document.getElementById('resSanctionAuth').innerText = auth;
-      document.getElementById('resAuthRationale').innerText = `(based on ${formatCrLacs(exposureCr)} exp)`;
+      document.getElementById('resAuthRationale').innerText = limitSpan;
 
       // ==========================================
       // 4. GENERATE INTEREST LOSS TABLE
       // ==========================================
       const roiHtml = [];
-      const zccFloor = eblr + 0.90; 
-      const clccFloor = eblr + 0.70;
-      const gmFloor = eblr + (isGoodRating ? 0.60 : 1.25);
-      const cgmFloor = eblr + (isGoodRating ? 0.35 : 1.00);
+      
+      // Calculate Floor ROI rules[cite: 1]
+      const zccFloorBps = 0.90;
+      const clccFloorBps = 0.70;
+      const gmFloorBps = isGoodRating ? 0.60 : 1.25;
+      const cgmFloorBps = isGoodRating ? 0.35 : 1.00;
+      
+      const zccFloor = eblr + zccFloorBps; 
+      const clccFloor = eblr + clccFloorBps;
+      const gmFloor = eblr + gmFloorBps;
+      const cgmFloor = eblr + cgmFloorBps;
       const dmdFloor = eblr;
 
       const buildRoiRow = (title, condition, floorRoi) => {
@@ -406,25 +444,25 @@
         
         let actualFloor = Math.max(floorRoi, dmdFloor); 
         let maxConcessionROI = cardROI - actualFloor; 
-        if(maxConcessionROI < 0) maxConcessionROI = 0; 
+        if(maxConcessionROI < 0) maxConcessionROI = 0; // If card rate is already below floor
         
         const finalRoi = cardROI - maxConcessionROI;
         const lossAmount = exposureINR * (maxConcessionROI / 100);
         
         return `<tr class="hover:bg-slate-700/30">
           <td class="p-3 font-medium text-white">${title}</td>
-          <td class="p-3">${condition}<br><span class="text-[9px] text-slate-500 lowercase">(floor: ${actualFloor.toFixed(2)}%)</span></td>
-          <td class="p-3 text-emerald-400 font-semibold">${finalRoi.toFixed(2)}%</td>
-          <td class="p-3 text-right text-red-400 font-mono">${formatINR(lossAmount)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${exposureCr}cr * ${maxConcessionROI.toFixed(2)}%)</span></td>
+          <td class="p-3">${condition}</td>
+          <td class="p-3 text-emerald-400 font-semibold">${finalRoi.toFixed(2)}%<br><span class="text-[9px] text-slate-500 lowercase">(floor constraint applied if necessary)</span></td>
+          <td class="p-3 text-right text-red-400 font-mono">${formatINR(lossAmount)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${exposureCr}cr * ${maxConcessionROI.toFixed(2)}% lost)</span></td>
         </tr>`;
       };
 
       roiHtml.push(buildRoiRow('RCC', 'NIL', cardROI));
-      roiHtml.push(buildRoiRow('ZCC', isEligibleForFullConc?'Up to 10% Spread':'NIL', isEligibleForFullConc?zccFloor:cardROI));
-      roiHtml.push(buildRoiRow('CLCC', isEligibleForFullConc?'Up to 25% Spread':'NIL', isEligibleForFullConc?clccFloor:cardROI));
-      roiHtml.push(buildRoiRow('GM (NW)', 'Discretionary Floor', gmFloor));
-      roiHtml.push(buildRoiRow('CGM (Circle)', 'Discretionary Floor', cgmFloor));
-      roiHtml.push(buildRoiRow('DMD (Vertical)', 'Up to EBR', dmdFloor));
+      roiHtml.push(buildRoiRow('ZCC', isEligibleForFullConc ? `Max 10% Spread (Floor: EBR + ${zccFloorBps * 100} bps)` : 'NIL', isEligibleForFullConc ? zccFloor : cardROI));
+      roiHtml.push(buildRoiRow('CLCC', isEligibleForFullConc ? `Max 25% Spread (Floor: EBR + ${clccFloorBps * 100} bps)` : 'NIL', isEligibleForFullConc ? clccFloor : cardROI));
+      roiHtml.push(buildRoiRow('GM (NW)', `Floor rate up to EBR + ${gmFloorBps * 100} bps`, gmFloor));
+      roiHtml.push(buildRoiRow('CGM (Circle)', `Floor rate up to EBR + ${cgmFloorBps * 100} bps`, cgmFloor));
+      roiHtml.push(buildRoiRow('DMD (Vertical)', 'Up to the EBR used in pricing', dmdFloor));
 
       document.getElementById('roiTableBody').innerHTML = roiHtml.join('');
 
@@ -432,22 +470,26 @@
       // 5. GENERATE SERVICE CHARGE LOSS TABLE
       // ==========================================
       const feeHtml = [];
-      const buildFeeRow = (title, pctAllowed) => {
+      const buildFeeRow = (title, conditionText, pctAllowed) => {
+        if(pctAllowed === 0) {
+          return `<tr><td class="p-3 font-medium text-white">${title}</td><td class="p-3 text-slate-500">${conditionText}</td><td class="p-3 text-emerald-400 font-semibold">${formatINR(procFee)}</td><td class="p-3 text-right text-slate-500">₹0</td></tr>`;
+        }
         const loss = procFee * (pctAllowed/100);
         const finalFee = procFee - loss;
         return `<tr class="hover:bg-slate-700/30">
           <td class="p-3 font-medium text-white">${title}</td>
-          <td class="p-3">${pctAllowed}% Waiver</td>
+          <td class="p-3">${conditionText}</td>
           <td class="p-3 text-emerald-400 font-semibold">${formatINR(finalFee)}</td>
           <td class="p-3 text-right text-red-400 font-mono">${formatINR(loss)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${procFee} * ${pctAllowed}%)</span></td>
         </tr>`;
       };
 
-      feeHtml.push(buildFeeRow('ZCC / DGM', isEligibleForFullConc?10:0));
-      feeHtml.push(buildFeeRow('GM (NW)', 30));
-      feeHtml.push(buildFeeRow('CLCC', isEligibleForFullConc?50:0));
-      feeHtml.push(buildFeeRow('CGM (Circle)', isEligibleForFullConc?75:50));
-      feeHtml.push(buildFeeRow('DMD / CCSC', 100));
+      feeHtml.push(buildFeeRow('DGM (B&O/COO)', isEligibleForFullConc ? 'Up to 10%' : 'NIL', isEligibleForFullConc ? 10 : 0));
+      feeHtml.push(buildFeeRow('GM (NW / Branch Head)', isEligibleForFullConc ? 'Up to 30%' : 'NIL', isEligibleForFullConc ? 30 : 0));
+      feeHtml.push(buildFeeRow('ZCC', isEligibleForFullConc ? 'Up to 10%' : 'NIL', isEligibleForFullConc ? 10 : 0));
+      feeHtml.push(buildFeeRow('CLCC', isEligibleForFullConc ? 'Up to 50%' : 'NIL', isEligibleForFullConc ? 50 : 0));
+      feeHtml.push(buildFeeRow('CGM (Circle)', isEligibleForFullConc ? 'Up to 75%' : 'Up to 50%', isEligibleForFullConc ? 75 : 50));
+      feeHtml.push(buildFeeRow('DMD / RCCC / CCSC', 'FULL (100%)', 100));
       
       document.getElementById('feeTableBody').innerHTML = feeHtml.join('');
 
@@ -455,24 +497,27 @@
       // 6. GENERATE LC/BG LOSS TABLE
       // ==========================================
       const bgHtml = [];
-      const buildBgRow = (title, pctAllowed) => {
+      const buildBgRow = (title, conditionText, pctAllowed) => {
+        if(pctAllowed === 0) {
+          return `<tr><td class="p-3 font-medium text-white">${title}</td><td class="p-3 text-slate-500">${conditionText}</td><td class="p-3 text-emerald-400 font-semibold">${formatINR(baseBgFeeYearly)}</td><td class="p-3 text-right text-slate-500">₹0</td></tr>`;
+        }
         const theoreticalLoss = baseBgFeeYearly * (pctAllowed/100);
         const finalFee = Math.max(600, baseBgFeeYearly - theoreticalLoss);
         const actLoss = baseBgFeeYearly - finalFee;
-        const note = finalFee === 600 && pctAllowed > 0 ? " (min cap hit)" : "";
+        const note = finalFee === 600 && pctAllowed > 0 ? " (min cap applied)" : "";
         
         return `<tr class="hover:bg-slate-700/30">
           <td class="p-3 font-medium text-white">${title}</td>
-          <td class="p-3">${pctAllowed}% Waiver</td>
+          <td class="p-3">${conditionText}</td>
           <td class="p-3 text-emerald-400 font-semibold">${formatINR(finalFee)}</td>
           <td class="p-3 text-right text-red-400 font-mono">${formatINR(actLoss)}<br><span class="text-[9px] text-slate-500 lowercase">(₹${baseBgFeeYearly} * ${pctAllowed}%${note})</span></td>
         </tr>`;
       };
 
-      bgHtml.push(buildBgRow('DGM / ZCC', isEligibleForFullConc?10:0));
-      bgHtml.push(buildBgRow('GM (NW)', 30));
-      bgHtml.push(buildBgRow('CGM (Circle)', isEligibleForFullConc?75:50));
-      bgHtml.push(buildBgRow('DMD / CCSC', 100));
+      bgHtml.push(buildBgRow('DGM (B&O/COO) / ZCC', isEligibleForFullConc ? 'Up to 10%' : 'NIL', isEligibleForFullConc ? 10 : 0));
+      bgHtml.push(buildBgRow('GM (NW / Branch Head)', isEligibleForFullConc ? 'Up to 30%' : 'NIL', isEligibleForFullConc ? 30 : 0));
+      bgHtml.push(buildBgRow('CGM (Circle)', isEligibleForFullConc ? 'Up to 75%' : 'Up to 50%', isEligibleForFullConc ? 75 : 50));
+      bgHtml.push(buildBgRow('DMD (Vertical)', 'FULL (100%)', 100));
 
       document.getElementById('bgTableBody').innerHTML = bgHtml.join('');
     }
