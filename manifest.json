@@ -1,0 +1,21 @@
+{
+  "name": "CRA Credit Intelligence App",
+  "short_name": "CRA Lookup",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "[https://img.icons8.com/color/192/bank.png](https://img.icons8.com/color/192/bank.png)",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "[https://img.icons8.com/color/512/bank.png](https://img.icons8.com/color/512/bank.png)",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
