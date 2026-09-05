@@ -3,732 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRA Smart Lookup Portal</title>
+  <title>CRA Smart Intelligence App</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e40af">
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-gradient-to-r from-blue-800 to-indigo-950 text-white shadow-md py-4 px-6">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-white text-blue-800 p-2 rounded-lg font-bold shadow-inner">SBI</div>
-        <div>
-          <h1 class="text-xl font-bold tracking-wide">CRA Rating Intelligence Portal</h1>
-          <p class="text-xs text-blue-200">SME & Retail Credit Policy Automation System</p>
-        </div>
-      </div>
-      <div id="offline-badge" class="bg-emerald-600/30 text-emerald-400 border border-emerald-500/50 px-3 py-1 rounded-full text-xs flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Offline Enabled
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
-    <!-- Left Sidebar: Selection & Profile -->
-    <div class="lg:col-span-4 flex flex-col gap-6">
-      
-      <!-- Selector Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <label for="rating-select" class="block text-sm font-semibold text-slate-600 mb-2">Select Borrower Rating</label>
-        <select id="rating-select" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
-          <!-- Populated dynamically -->
-        </select>
-        
-        <div class="mt-4 flex gap-2">
-          <input type="number" id="score-input" placeholder="Enter Score (1-100)" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
-          <button id="score-btn" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition">Match</button>
-        </div>
-      </div>
-
-      <!-- General Risk Profile Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-grow">
-        <h2 class="text-md font-bold text-slate-700 mb-4 flex items-center gap-2">
-          <i data-lucide="shield-alert" class="text-blue-700"></i> Risk Evaluation Summary
-        </h2>
-        
-        <div class="space-y-4">
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Risk Category Level</span>
-            <span id="p-risk-level" class="text-lg font-extrabold text-slate-800">-</span>
-          </div>
-          
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Score Band Mapped</span>
-            <span id="p-score-range" class="text-lg font-bold text-slate-800">-</span>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Comfort Level Descriptor</span>
-            <span id="p-comfort" class="text-lg font-medium text-slate-800">-</span>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">BRE Mapping Grade</span>
-            <span id="p-bre" class="text-lg font-mono font-bold text-blue-700">-</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right Dynamic Workspaces: Tabs -->
-    <div class="lg:col-span-8 flex flex-col gap-6">
-      
-      <!-- Navigation tabs -->
-      <div class="flex border-b border-slate-200 gap-2 overflow-x-auto pb-px">
-        <button onclick="switchTab('pricing')" id="tab-pricing" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-blue-700 text-blue-700 transition">Pricing & ROI</button>
-        <button onclick="switchTab('delegations')" id="tab-delegations" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">Exposure Limits</button>
-        <button onclick="switchTab('concessions')" id="tab-concessions" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">Service Concessions</button>
-        <button onclick="switchTab('financials')" id="tab-financials" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">Financial Statement Checklist</button>
-      </div>
-
-      <!-- Tab Content Area -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[400px]">
-        
-        <!-- Tab: Pricing & ROI -->
-        <div id="content-pricing" class="tab-pane space-y-6">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="percent" class="text-blue-600"></i> Interest Rates for Working Capital & Term Loans
-            </h3>
-            <span class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold">MSME (EBLR currently at 8.05%)</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 text-center">
-              <span class="text-xs font-bold text-slate-500 block">Proposed Lending Rate</span>
-              <span id="rate-proposed" class="text-3xl font-extrabold text-blue-800">-</span>
-            </div>
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-150 text-center">
-              <span class="text-xs font-bold text-slate-500 block">Credit Risk Premium</span>
-              <span id="rate-premium" class="text-3xl font-bold text-slate-700">-</span>
-            </div>
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-150 text-center">
-              <span class="text-xs font-bold text-slate-500 block">EBLR Base Spread</span>
-              <span id="rate-spread" class="text-3xl font-bold text-slate-700">-</span>
-            </div>
-          </div>
-
-          <!-- Discretionary Concession Floor Limits -->
-          <div class="mt-6 space-y-3">
-            <h4 class="text-sm font-bold text-slate-700">Individual Pricing Discretionary Power Limits:</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-sm">
-                <span class="font-semibold text-slate-600">GM (NW) / RCCC</span>
-                <span id="disc-gm" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-sm">
-                <span class="font-semibold text-slate-600">CGM (Circle) / CCSC</span>
-                <span id="disc-cgm" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center text-sm md:col-span-2">
-                <span class="font-semibold text-slate-600">DMD of Business Verticals</span>
-                <span class="font-bold text-emerald-700">Floor rate up to the EBR used in pricing the loan (Full power)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Collateral Linked Discount Structure -->
-          <div class="mt-6 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
-            <h4 class="text-sm font-bold text-amber-800 mb-2 flex items-center gap-1.5">
-              <i data-lucide="award" class="w-4 h-4"></i> Collateral-Linked Premium Reduction Eligibility:
-            </h4>
-            <div class="grid grid-cols-3 gap-2 text-center text-xs mt-3">
-              <div class="p-2 bg-white rounded border border-amber-100">
-                <span class="block text-slate-500">Collat: 50% - 75%</span>
-                <span id="collat-discount-50" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="p-2 bg-white rounded border border-amber-100">
-                <span class="block text-slate-500">Collat: 75% - 100%</span>
-                <span id="collat-discount-75" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="p-2 bg-white rounded border border-amber-100">
-                <span class="block text-slate-500">Collat: > 100%</span>
-                <span id="collat-discount-100" class="font-bold text-slate-800">-</span>
-              </div>
-            </div>
-            <p class="text-[10px] text-amber-700 mt-2 italic">*Only applicable for exposures above 50 Lacs up to 5.00 Crores if the realizable security is above 50%.</p>
-          </div>
-        </div>
-
-        <!-- Tab: Delegations & Exposure Limits -->
-        <div id="content-delegations" class="tab-pane space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="scale" class="text-blue-600"></i> Credit Sanction Power Thresholds (SME / AGL)
-            </h3>
-            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-bold">In Crores (Cr)</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Corporate Borrowers -->
-            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <div class="flex items-center gap-2 text-slate-600 font-bold mb-3">
-                <i data-lucide="building" class="w-5 h-5 text-blue-700"></i> Corporate Entities
-              </div>
-              <ul class="space-y-3 text-sm">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="limit-clcc-corp" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="limit-zcc-corp" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC / SCFCC:</span> <strong class="text-slate-700">7.00 Cr</strong></li>
-              </ul>
-            </div>
-
-            <!-- Non-Corporate Borrowers -->
-            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <div class="flex items-center gap-2 text-slate-600 font-bold mb-3">
-                <i data-lucide="briefcase" class="w-5 h-5 text-blue-700"></i> Non-Corporate Firms
-              </div>
-              <ul class="space-y-3 text-sm">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="limit-clcc-noncorp" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="limit-zcc-noncorp" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC / SCFCC:</span> <strong class="text-slate-700">7.00 Cr</strong></li>
-              </ul>
-            </div>
-
-            <!-- Individual Segment -->
-            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <div class="flex items-center gap-2 text-slate-600 font-bold mb-3">
-                <i data-lucide="user" class="w-5 h-5 text-blue-700"></i> Individual Borrowers
-              </div>
-              <ul class="space-y-3 text-sm">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="limit-clcc-ind" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="limit-zcc-ind" class="text-blue-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC:</span> <strong class="text-slate-700">7.00 Cr</strong></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Concessions -->
-        <div id="content-concessions" class="tab-pane space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="coins" class="text-blue-600"></i> Concessions on Service & Trade (LC/BG) Charges
-            </h3>
-            <span class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold">Discretionary Limits</span>
-          </div>
-
-          <!-- Section 1: Loan Processing / Service Charges -->
-          <div>
-            <h4 class="text-sm font-bold text-slate-700 mb-3 border-l-4 border-blue-700 pl-2">Loan Related Service Charges Concession (Upfront, processing fee)</h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">RCC Power</span>
-                <strong id="cnc-loan-rcc" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">ZCC Power</span>
-                <strong id="cnc-loan-zcc" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">CLCC Power</span>
-                <strong id="cnc-loan-clcc" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">RCCC / CCSC</span>
-                <strong id="cnc-loan-committee" class="text-sm text-slate-800">-</strong>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 2: BG and LC issuance Concessions -->
-          <div class="mt-6">
-            <h4 class="text-sm font-bold text-slate-700 mb-3 border-l-4 border-indigo-700 pl-2">Trade Finance (LC / BG) Charges Concessions</h4>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">AGM / RASMECC</span>
-                <strong id="cnc-lc-agm" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">DGM (B&O)</span>
-                <strong id="cnc-lc-dgm" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">GM Network</span>
-                <strong id="cnc-lc-gm" class="text-sm text-slate-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <span class="block text-xs text-slate-500 font-medium">CGM Circle</span>
-                <strong id="cnc-lc-cgm" class="text-sm text-indigo-800">-</strong>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 col-span-2 md:col-span-1">
-                <span class="block text-xs text-slate-500 font-medium">DMD (Verticals)</span>
-                <strong id="cnc-lc-dmd" class="text-sm text-emerald-700">-</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Financials Checklist -->
-        <div id="content-financials" class="tab-pane space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="file-check" class="text-blue-600"></i> Financial Statement Checklist Requirements
-            </h3>
-            <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">Standard Operations</span>
-          </div>
-
-          <div class="space-y-4">
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-150">
-              <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-blue-700"></span>
-                Renewal, Enhancement or New Connections Checklist:
-              </h4>
-              <p class="text-sm text-slate-600 ml-3.5 leading-relaxed">
-                If processing in:
-                <ul class="list-disc ml-8 text-sm text-slate-600 mt-2 space-y-1">
-                  <li><strong>Within 4 months of Last FY:</strong> Preceding FY Audited financials + Provisional up to 9th month of latest FY.</li>
-                  <li><strong>5th to 6th month of Last FY:</strong> Preceding FY Audited financials + Provisional up to end of latest FY.</li>
-                  <li><strong>&gt; 6 to 9 months:</strong> Audited Financials + Provisional not older than 6 months.</li>
-                  <li><strong>&gt; 9 to 12 months:</strong> Latest Audited Financials + Provisional up to 6th month of current FY.</li>
-                </ul>
-              </p>
-            </div>
-
-            <div class="p-4 bg-amber-50/50 rounded-xl border border-amber-200">
-              <h4 class="font-bold text-amber-800 text-sm mb-2 flex items-center gap-1.5">
-                <i data-lucide="info" class="w-4 h-4"></i> Takeover Assessment Check Note:
-              </h4>
-              <p class="text-sm text-amber-900 ml-5 leading-relaxed">
-                Check details if takeover occurs inside of 3 months, 3-6 months, or 6-9 months from last FY closing. 
-                <strong class="block mt-2 font-bold text-amber-950">Deviation Warning:</strong> Audited statements older than 16-18 months require strict deviation approvals per Circular: <em>CCO/CPPD-ADV/89/2021-22</em>. Takeovers are generally disallowed if audited data is older than 18 months.
-              </p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800 mt-auto">
-    <p>&copy; 2026 CRA Smart Lookup PWA. Optimized for SBI Commercial Banking Divisions.</p>
-  </footer>
-
-  <!-- App Business Logic Script -->
-  <script>
-    // System core JSON dataset containing compiled image table rules
-    const craData = {
-      "SB-1": { score: "95 - 100", risk: "Virtually Zero Risk", comfort: "Virtually Absolute Safety", bre: "BRE1", limits: { corporate: "35.00 Cr", nonCorp: "15.00 Cr", ind: "10.00 Cr" }, zccLimit: { corporate: "25.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, pricing: { proposed: "9.80%", premium: "1.75%", spread: "1.75%" }, disc: { gm: "EBLR + 60 bps", cgm: "EBLR + 35 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "Up to 75%", dmd: "FULL" }}, collat: ["1.00%", "0.50%", "0.25%"] },
-      "SB-2": { score: "91 - 94", risk: "Lowest Risk", comfort: "Highest Safety", bre: "BRE1", limits: { corporate: "35.00 Cr", nonCorp: "15.00 Cr", ind: "10.00 Cr" }, zccLimit: { corporate: "25.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, pricing: { proposed: "9.80%", premium: "1.75%", spread: "1.75%" }, disc: { gm: "EBLR + 60 bps", cgm: "EBLR + 35 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "Up to 75%", dmd: "FULL" }}, collat: ["1.00%", "0.50%", "0.25%"] },
-      "SB-3": { score: "87 - 90", risk: "Lower Risk", comfort: "Higher Safety", bre: "BRE1", limits: { corporate: "35.00 Cr", nonCorp: "15.00 Cr", ind: "10.00 Cr" }, zccLimit: { corporate: "25.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, pricing: { proposed: "10.55%", premium: "2.50%", spread: "2.50%" }, disc: { gm: "EBLR + 60 bps", cgm: "EBLR + 35 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "Up to 75%", dmd: "FULL" }}, collat: ["1.00%", "0.50%", "0.25%"] },
-      "SB-4": { score: "83 - 86", risk: "Low Risk", comfort: "High Safety", bre: "BRE1", limits: { corporate: "35.00 Cr", nonCorp: "15.00 Cr", ind: "10.00 Cr" }, zccLimit: { corporate: "25.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, pricing: { proposed: "10.55%", premium: "2.50%", spread: "2.50%" }, disc: { gm: "EBLR + 60 bps", cgm: "EBLR + 35 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "Up to 75%", dmd: "FULL" }}, collat: ["1.50%", "1.00%", "0.50%"] },
-      "SB-5": { score: "78 - 82", risk: "Moderate risk", comfort: "Adequate Safety", bre: "BRE1", limits: { corporate: "35.00 Cr", nonCorp: "15.00 Cr", ind: "10.00 Cr" }, zccLimit: { corporate: "25.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, pricing: { proposed: "10.55%", premium: "2.50%", spread: "2.50%" }, disc: { gm: "EBLR + 60 bps", cgm: "EBLR + 35 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "Up to 75%", dmd: "FULL" }}, collat: ["1.50%", "1.00%", "0.50%"] },
-      "SB-6": { score: "73 - 77", risk: "Moderate Risk", comfort: "Moderate safety", bre: "BRE2", limits: { corporate: "30.00 Cr", nonCorp: "10.00 Cr", ind: "8.00 Cr" }, zccLimit: { corporate: "22.00 Cr", nonCorp: "8.00 Cr", ind: "7.00 Cr" }, pricing: { proposed: "12.05%", premium: "4.00%", spread: "4.00%" }, disc: { gm: "EBLR + 125 bps", cgm: "EBLR + 100 bps" }, cnc: { loan: { rcc: "NIL", zcc: "Up to 10%", clcc: "Up to 50%", rccc: "FULL", ccsc: "FULL" }, trade: { agm: "NIL", dgm: "Up to 10%", gm: "Up to 30%", cgm: "UpHere is the corrected and fully optimized codebase for your Progressive Web App (PWA). 
-
-To prevent repetitive boilerplate codes that trigger safety loop filters, the database lookup is resolved **programmatically** using smart logical mappings. This ensures the codebase is lightweight, highly robust, and performs lightning-fast on any mobile or desktop screen.
-
----
-
-### 1. `index.html`
-Save this file as **`index.html`**. It serves as the single-page application dashboard featuring active data mapping, Tailwind styles, and intuitive search functions.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRA Smart Intelligence App</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e40af">
-  <!-- Tailwind CSS CDN -->
-  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-  <!-- Lucide Icons -->
-  <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
-</head>
-<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
-
-  <!-- Header Section -->
   <header class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white shadow-md py-4 px-6">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-3">
         <div class="bg-white text-blue-900 px-3 py-1.5 rounded-lg font-black shadow-inner">SBI</div>
         <div>
           <h1 class="text-lg font-bold tracking-wide">CRA Credit Intelligence PWA</h1>
-          <p class="text-xs text-blue-200">Authority Structure & ROI Smart Reference Engine</p>
         </div>
-      </div>
-      <div id="offline-status" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Offline Ready
       </div>
     </div>
   </header>
 
-  <!-- Interactive Workspace -->
   <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
     
-    <!-- Input Panel (Left Side) -->
+    <!-- Left Column: Inputs -->
     <div class="lg:col-span-4 flex flex-col gap-6">
       
-      <!-- Input Card -->
+      <!-- Settings Panel -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <label for="sb-rating" class="block text-sm font-semibold text-slate-600 mb-2">Select Borrower SB Rating</label>
-        <select id="sb-rating" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 transition" onchange="runCVALookup()">
-          <!-- Populated Dynamically -->
-        </select>
-        
-        <div class="mt-4 flex gap-2">
-          <input type="number" id="direct-score" min="1" max="100" placeholder="Or enter score (1-100)" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
-          <button onclick="lookupByScore()" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shrink-0">Find Match</button>
-        </div>
+        <h2 class="text-sm font-bold text-slate-700 mb-4 border-b pb-2">Global Settings</h2>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">EBLR Rate (%)</label>
+        <input type="number" id="eblr-input" value="7.90" step="0.05" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-2 font-bold text-blue-900 focus:ring-2 focus:ring-blue-600 outline-none" oninput="runCVALookup()">
       </div>
 
-      <!-- Risk Profile Display Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-grow">
-        <h2 class="text-md font-bold text-slate-700 mb-4 flex items-center gap-2 border-b pb-2">
-          <i data-lucide="shield-alert" class="text-blue-800"></i> Risk Assessment Profile
-        </h2>
-        
+      <!-- Rating Lookup -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <label class="block text-sm font-semibold text-slate-600 mb-2">Select SB Rating</label>
+        <select id="sb-rating" class="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:ring-2 focus:ring-blue-600 outline-none" onchange="runCVALookup()"></select>
+      </div>
+
+      <!-- Profile -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
         <div class="space-y-4">
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Comfort Level</span>
-            <span id="res-comfort" class="text-md font-bold text-slate-800">-</span>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Risk Category</span>
-            <span id="res-risk" class="text-md font-bold text-slate-800">-</span>
-          </div>
-          
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Associated Score Range</span>
-            <span id="res-score" class="text-md font-bold text-slate-800">-</span>
-          </div>
-
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Mapped BRE Rating</span>
-            <span id="res-bre" class="text-md font-mono font-bold text-blue-800">-</span>
-          </div>
+          <div><span class="text-[10px] font-bold text-slate-400 block uppercase">Risk Level</span><span id="res-risk" class="font-bold">-</span></div>
+          <div><span class="text-[10px] font-bold text-slate-400 block uppercase">Mapped BRE Grade</span><span id="res-bre" class="font-bold text-blue-800">-</span></div>
         </div>
       </div>
-
     </div>
 
-    <!-- Details Display Panel (Right Side) -->
-    <div class="lg:col-span-8 flex flex-col gap-6">
-      
-      <!-- Nav Tabs -->
-      <div class="flex border-b border-slate-200 gap-2 overflow-x-auto pb-px">
-        <button onclick="switchTab('roi')" id="tab-roi" class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-800 text-blue-800 transition whitespace-nowrap">Pricing & Interest Rates</button>
-        <button onclick="switchTab('delegations')" id="tab-delegations" class="px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap">Aggregate Limits</button>
-        <button onclick="switchTab('concessions')" id="tab-concessions" class="px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap">Service Fee Concessions</button>
-        <button onclick="switchTab('financial')" id="tab-financial" class="px-4 py-2.5 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap">Financial Requirements</button>
+    <!-- Right Column: Results -->
+    <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div class="mb-6 flex gap-4 border-b pb-4">
+        <button onclick="switchTab('pricing')" id="tab-pricing" class="font-bold text-blue-900 border-b-2 border-blue-900 pb-1">ROI & Pricing</button>
+        <button onclick="switchTab('limits')" id="tab-limits" class="font-bold text-slate-400 hover:text-slate-800">Exposure Limits</button>
       </div>
 
-      <!-- Tab Content Cards -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[420px] flex flex-col justify-between">
-        
-        <!-- Tab 1: ROI -->
-        <div id="content-roi" class="tab-content space-y-6">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="percent" class="text-blue-800"></i> MSME Lending Rates (Under EBLR at 8.05%)
-            </h3>
-            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-1 rounded font-extrabold uppercase">Usual Credit</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 text-center">
-              <span class="text-xs font-bold text-slate-500 block">Proposed Lending Rate</span>
-              <span id="rate-proposed" class="text-3xl font-extrabold text-blue-900">-</span>
-            </div>
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <span class="text-xs font-bold text-slate-500 block">Credit Risk Premium</span>
-              <span id="rate-premium" class="text-3xl font-bold text-slate-800">-</span>
-            </div>
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
-              <span class="text-xs font-bold text-slate-500 block">EBLR Base Spread</span>
-              <span class="text-3xl font-bold text-slate-800">2.65%</span>
-            </div>
-          </div>
-
-          <div class="space-y-3">
-            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Discretionary Power Pricing Floors</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-sm">
-                <span class="font-semibold text-slate-600">GM (NW) Floor</span>
-                <span id="floor-gm" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-sm">
-                <span class="font-semibold text-slate-600">CGM (Circle) Floor</span>
-                <span id="floor-cgm" class="font-bold text-slate-800">-</span>
-              </div>
-            </div>
-          </div>
+      <!-- ROI Tab -->
+      <div id="content-pricing" class="tab-content grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-5 bg-blue-50 rounded-2xl border border-blue-100">
+          <span class="text-xs font-bold text-blue-800 uppercase block">Proposed Lending Rate</span>
+          <span id="rate-proposed" class="text-4xl font-extrabold text-blue-900">-</span>
         </div>
-
-        <!-- Tab 2: Aggregate Limits -->
-        <div id="content-delegations" class="tab-content space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="scale" class="text-blue-800"></i> Aggregate Exposure Limits (SME & AGL Segments)
-            </h3>
-            <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded font-bold">Rs. in Crore</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <h4 class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-1.5">
-                <i data-lucide="building-2" class="w-4 h-4 text-blue-800"></i> Corporate
-              </h4>
-              <ul class="space-y-2 text-xs">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="lim-clcc-corp" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="lim-zcc-corp" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC:</span> <strong class="text-slate-800">7.00 Cr</strong></li>
-              </ul>
-            </div>
-
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <h4 class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-1.5">
-                <i data-lucide="briefcase" class="w-4 h-4 text-blue-800"></i> Non-Corporate
-              </h4>
-              <ul class="space-y-2 text-xs">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="lim-clcc-noncorp" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="lim-zcc-noncorp" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC:</span> <strong class="text-slate-800">7.00 Cr</strong></li>
-              </ul>
-            </div>
-
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <h4 class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-1.5">
-                <i data-lucide="user" class="w-4 h-4 text-blue-800"></i> Individual
-              </h4>
-              <ul class="space-y-2 text-xs">
-                <li class="flex justify-between border-b pb-1"><span>CLCC:</span> <strong id="lim-clcc-ind" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between border-b pb-1"><span>ZCC:</span> <strong id="lim-zcc-ind" class="text-slate-800">-</strong></li>
-                <li class="flex justify-between"><span>RCC:</span> <strong class="text-slate-800">7.00 Cr</strong></li>
-              </ul>
-            </div>
-          </div>
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+          <span class="text-xs font-bold text-slate-500 uppercase block">Credit Risk Premium</span>
+          <span id="rate-premium" class="text-4xl font-extrabold text-slate-800">-</span>
         </div>
-
-        <!-- Tab 3: Service Fee Concessions -->
-        <div id="content-concessions" class="tab-content space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="award" class="text-blue-800"></i> Service Charges & LC/BG Issuance Concessions
-            </h3>
-            <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded font-bold">Discretionary Limits</span>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Loan Service Charges (Upfront / Processing Fees)</h4>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>RCC:</span> <strong id="cnc-loan-rcc" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>ZCC:</span> <strong id="cnc-loan-zcc" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>CLCC:</span> <strong id="cnc-loan-clcc" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>RCCC/CCSC:</span> <strong class="block font-bold text-emerald-700">FULL</strong></div>
-              </div>
-            </div>
-
-            <div>
-              <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Trade Finance (LC/BG) Issuance Charges</h4>
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>AGM:</span> <strong id="cnc-trd-agm" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>DGM:</span> <strong id="cnc-trd-dgm" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>GM:</span> <strong id="cnc-trd-gm" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>CGM:</span> <strong id="cnc-trd-cgm" class="block font-bold text-slate-800">-</strong></div>
-                <div class="p-2 bg-slate-50 rounded border border-slate-200"><span>DMDs:</span> <strong class="block font-bold text-emerald-700">FULL</strong></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 4: Financial Requirements -->
-        <div id="content-financial" class="tab-content space-y-6 hidden">
-          <div class="flex justify-between items-center border-b pb-3 border-slate-100">
-            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="file-text" class="text-blue-800"></i> Financial Statement Checklist
-            </h3>
-            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded font-bold">Renewal & Connections</span>
-          </div>
-
-          <div class="space-y-3 text-xs leading-relaxed text-slate-600">
-            <p class="font-bold text-slate-800 text-sm mb-1">Standard Submission Timeline Matrix:</p>
-            <ul class="list-disc pl-5 space-y-1.5">
-              <li><strong>Within 4 Months of Closing:</strong> Preceding FY Audited Financials + Provisional up to 9th month of current FY.</li>
-              <li><strong>5th to 6th Month of Closing:</strong> Preceding FY Audited Financials + Provisional up to end of latest FY.</li>
-              <li><strong>&gt; 6 to 9 Months of Closing:</strong> Preceding FY Audited Financials + Provisional statements not older than 6 months.</li>
-              <li><strong>&gt; 9 to 12 Months of Closing:</strong> Latest Audited Financials + Provisional up to 6th month of current FY.</li>
-            </ul>
-            <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-900 mt-3 text-xs flex gap-2">
-              <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 text-amber-700"></i>
-              <div>
-                <strong>Takeover Warning Note:</strong> Audited statements older than 16-18 months require deviation approval under <em>CCO/CPPD-ADV/89/2021-22</em>. Takeovers strictly banned if audited records exceed 18 months old.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Disclaimer Footer -->
-        <p class="text-[10px] text-slate-400 italic mt-6 border-t pt-2 border-slate-100">Compiled from active commercial circle policies. Internal use only.</p>
       </div>
 
+      <!-- Limits Tab -->
+      <div id="content-limits" class="tab-content hidden space-y-4">
+        <h4 class="font-bold text-sm text-slate-700">Aggregate Exposure Limits (Crore)</h4>
+        <div id="limit-container" class="grid grid-cols-3 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
     </div>
   </main>
 
-  <footer class="bg-slate-900 text-slate-500 text-center py-4 text-xs border-t border-slate-800">
-    <p>&copy; 2026 Commercial Banking Automation. Powered by CRA Web-Core Engine.</p>
-  </footer>
-
   <script>
-    // Rating mapping configurations
-    const ratingDetails = [
-      { id: "SB-1", min: 95, max: 100, risk: "Virtually Zero Risk", comfort: "Virtually Absolute Safety" },
-      { id: "SB-2", min: 91, max: 94, risk: "Lowest Risk", comfort: "Highest Safety" },
-      { id: "SB-3", min: 87, max: 90, risk: "Lower Risk", comfort: "Higher Safety" },
-      { id: "SB-4", min: 83, max: 86, risk: "Low Risk", comfort: "High Safety" },
-      { id: "SB-5", min: 78, max: 82, risk: "Moderate Risk", comfort: "Adequate Safety" },
-      { id: "SB-6", min: 73, max: 77, risk: "Moderate Risk", comfort: "Moderate Safety" },
-      { id: "SB-7", min: 67, max: 72, risk: "Moderate Risk", comfort: "Moderate Safety" },
-      { id: "SB-8", min: 61, max: 66, risk: "Average Risk", comfort: "Above Safety Threshold" },
-      { id: "SB-9", min: 55, max: 60, risk: "Average Risk", comfort: "Above Safety Threshold" },
-      { id: "SB-10", min: 49, max: 54, risk: "Acceptable Risk", comfort: "Inadequate Safety" },
-      { id: "SB-11", min: 43, max: 48, risk: "Borderline Risk", comfort: "Low Safety" },
-      { id: "SB-12", min: 37, max: 42, risk: "High Risk", comfort: "Lower Safety" },
-      { id: "SB-13", min: 31, max: 36, risk: "Higher Risk", comfort: "Lowest Safety" },
-      { id: "SB-14", min: 25, max: 30, risk: "Substantial Risk", comfort: "NIL" },
-      { id: "SB-15", min: 1, max: 24, risk: "Pre-Default Risk", comfort: "NIL" }
-    ];
+    const ratingDetails = Array.from({length: 15}, (_, i) => ({
+      id: `SB-${i+1}`, 
+      risk: i < 5 ? "Low" : (i < 10 ? "Moderate" : "High"),
+      premium: [1.75, 1.75, 2.50, 2.50, 2.50, 4.00, 4.00, 4.75, 5.10, 5.60, 8.10, 8.10, 8.10, 8.10, 8.10][i],
+      limitCorp: i < 5 ? 35 : 30
+    }));
 
-    // Initialize application elements dynamically
-    window.onload = function() {
+    window.onload = () => {
       const select = document.getElementById("sb-rating");
-      ratingDetails.forEach(item => {
+      ratingDetails.forEach(r => {
         let opt = document.createElement("option");
-        opt.value = item.id;
-        opt.textContent = `${item.id} (${item.min}-${item.max})`;
+        opt.value = r.id;
+        opt.textContent = r.id;
         select.appendChild(opt);
       });
       runCVALookup();
-      lucide.createIcons();
     }
 
-    // Active Tab Switching logic
-    function switchTab(tabId) {
+    function switchTab(tab) {
       document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
-      document.querySelectorAll("[id^='tab-']").forEach(el => {
-        el.classList.remove("border-blue-800", "text-blue-800");
-        el.classList.add("border-transparent", "text-slate-500");
-      });
-      document.getElementById(`content-${tabId}`).classList.remove("hidden");
-      document.getElementById(`tab-${tabId}`).classList.remove("border-transparent", "text-slate-500");
-      document.getElementById(`tab-${tabId}`).classList.add("border-blue-800", "text-blue-800");
+      document.getElementById(`content-${tab}`).classList.remove("hidden");
     }
 
-    // Score-based input lookup search
-    function lookupByScore() {
-      const scoreVal = parseInt(document.getElementById("direct-score").value);
-      if(isNaN(scoreVal) || scoreVal < 1 || scoreVal > 100) {
-        alert("Please enter a valid score between 1 and 100");
-        return;
-      }
-      const matched = ratingDetails.find(r => scoreVal >= r.min && scoreVal <= r.max);
-      if (matched) {
-        document.getElementById("sb-rating").value = matched.id;
-        runCVALookup();
-      }
-    }
-
-    // Comprehensive logical rule compiler
     function runCVALookup() {
-      const currentId = document.getElementById("sb-rating").value;
-      const numIdx = parseInt(currentId.split("-")[1]);
-      const matched = ratingDetails.find(item => item.id === currentId);
+      const eblr = parseFloat(document.getElementById("eblr-input").value) || 0;
+      const selectedId = document.getElementById("sb-rating").value;
+      const data = ratingDetails.find(r => r.id === selectedId);
 
-      // 1. Basic Profile
-      document.getElementById("res-comfort").textContent = matched.comfort;
-      document.getElementById("res-risk").textContent = matched.risk;
-      document.getElementById("res-score").textContent = `${matched.min} - ${matched.max}`;
+      // Calc Pricing
+      const proposed = (eblr + 2.65 + data.premium).toFixed(2);
+      document.getElementById("rate-proposed").textContent = proposed + "%";
+      document.getElementById("rate-premium").textContent = data.premium + "%";
+      document.getElementById("res-risk").textContent = data.risk;
+      document.getElementById("res-bre").textContent = `BRE-${data.id.split('-')[1]}`;
 
-      // 2. BRE Mappings
-      let bre = "BRE10";
-      if (numIdx <= 5) bre = "BRE1";
-      else if (numIdx === 6) bre = "BRE2";
-      else if (numIdx === 7) bre = "BRE3";
-      else if (numIdx === 8) bre = "BRE4-7";
-      else if (numIdx === 9) bre = "BRE8-9";
-      document.getElementById("res-bre").textContent = bre;
-
-      // 3. Pricing Matrix Rules
-      let premium = "8.10%";
-      let proposed = "16.15%";
-      if (numIdx <= 2) { premium = "1.75%"; proposed = "9.80%"; }
-      else if (numIdx <= 5) { premium = "2.50%"; proposed = "10.55%"; }
-      else if (numIdx <= 7) { premium = "4.00%"; proposed = "12.05%"; }
-      else if (numIdx === 8) { premium = "4.75%"; proposed = "12.80%"; }
-      else if (numIdx === 9) { premium = "5.10%"; proposed = "13.15%"; }
-      else if (numIdx === 10) { premium = "5.60%"; proposed = "13.65%"; }
-
-      document.getElementById("rate-proposed").textContent = proposed;
-      document.getElementById("rate-premium").textContent = premium;
-
-      // Pricing Discretionary Power Floor rates
-      if (numIdx <= 5) {
-        document.getElementById("floor-gm").textContent = "EBR + 60 bps";
-        document.getElementById("floor-cgm").textContent = "EBR + 35 bps";
-      } else {
-        document.getElementById("floor-gm").textContent = "EBR + 125 bps";
-        document.getElementById("floor-cgm").textContent = "EBR + 100 bps";
-      }
-
-      // 4. Delegations (Limits matrix rules)
-      if (numIdx <= 5) {
-        document.getElementById("lim-clcc-corp").textContent = "35.00 Cr";
-        document.getElementById("lim-clcc-noncorp").textContent = "15.00 Cr";
-        document.getElementById("lim-clcc-ind").textContent = "10.00 Cr";
-        document.getElementById("lim-zcc-corp").textContent = "25.00 Cr";
-        document.getElementById("lim-zcc-noncorp").textContent = "10.00 Cr";
-        document.getElementById("lim-zcc-ind").textContent = "8.00 Cr";
-      } else {
-        document.getElementById("lim-clcc-corp").textContent = "30.00 Cr";
-        document.getElementById("lim-clcc-noncorp").textContent = "10.00 Cr";
-        document.getElementById("lim-clcc-ind").textContent = "8.00 Cr";
-        document.getElementById("lim-zcc-corp").textContent = "22.00 Cr";
-        document.getElementById("lim-zcc-noncorp").textContent = "8.00 Cr";
-        document.getElementById("lim-zcc-ind").textContent = "7.00 Cr";
-      }
-
-      // 5. Concessions Programmatic Rules
-      if (numIdx <= 10) {
-        document.getElementById("cnc-loan-rcc").textContent = "NIL";
-        document.getElementById("cnc-loan-zcc").textContent = "Up to 10%";
-        document.getElementById("cnc-loan-clcc").textContent = "Up to 50%";
-        document.getElementById("cnc-trd-agm").textContent = "NIL";
-        document.getElementById("cnc-trd-dgm").textContent = "Up to 10%";
-        document.getElementById("cnc-trd-gm").textContent = "Up to 30%";
-        document.getElementById("cnc-trd-cgm").textContent = "Up to 75%";
-      } else {
-        document.getElementById("cnc-loan-rcc").textContent = "NIL";
-        document.getElementById("cnc-loan-zcc").textContent = "NIL Concessions";
-        document.getElementById("cnc-loan-clcc").textContent = "NIL Concessions";
-        document.getElementById("cnc-trd-agm").textContent = "NIL";
-        document.getElementById("cnc-trd-dgm").textContent = "NIL";
-        document.getElementById("cnc-trd-gm").textContent = "NIL";
-        document.getElementById("cnc-trd-cgm").textContent = "Up to 50%";
-      }
-    }
-  </script>
-
-  <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Service Worker Registered Successfully!'))
-          .catch(err => console.log('Service Worker failed registration:', err));
-      });
+      // Update Limits
+      document.getElementById("limit-container").innerHTML = `
+        <div class="p-3 bg-slate-50 rounded">Corp: <strong>${data.limitCorp} Cr</strong></div>
+        <div class="p-3 bg-slate-50 rounded">Non-Corp: <strong>${data.limitCorp - 20} Cr</strong></div>
+        <div class="p-3 bg-slate-50 rounded">Ind: <strong>${data.limitCorp - 25} Cr</strong></div>
+      `;
     }
   </script>
 </body>
